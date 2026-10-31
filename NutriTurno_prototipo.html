@@ -1,0 +1,608 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>NutriTurno Prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone-frame app with a device toggle; desktop mode reflows nav to a left rail and grids to columns */
+:root{
+  --bg:#FBF2E4; --card:#FFFFFF; --ink:#2B1710; --muted:#7E6B57; --border:#EAD9BE;
+  --amber:#F3A53C; --amber-d:#A66819; --amber-bg:#FDEBD0;
+  --tomato:#B63F19; --tomato-bg:#FBE2DA;
+  --sage:#4F7435; --sage-bg:#E4EEDA;
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C140D; --card:#2A2018; --ink:#F4E9DB; --muted:#C9B6A0; --border:#4A3B2A;
+    --amber:#F3A53C; --amber-d:#F3C07E; --amber-bg:#3A2B16;
+    --tomato:#F0836A; --tomato-bg:#3B2019;
+    --sage:#8FC26A; --sage-bg:#20301A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C140D; --card:#2A2018; --ink:#F4E9DB; --muted:#C9B6A0; --border:#4A3B2A;
+  --amber:#F3A53C; --amber-d:#F3C07E; --amber-bg:#3A2B16;
+  --tomato:#F0836A; --tomato-bg:#3B2019;
+  --sage:#8FC26A; --sage-bg:#20301A;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:20px;
+  min-height:100%;
+}
+h1,h2,h3{font-family:var(--font-display); margin:0}
+button{font-family:inherit}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:var(--bg);
+  padding:10px 16px; border-radius:0 0 8px 0; z-index:100;
+}
+.skip-link:focus{left:0}
+:focus-visible{outline:3px solid var(--amber-d); outline-offset:2px; border-radius:4px}
+
+/* ---- top toolbar (demo controls, not part of the app itself) ---- */
+.toolbar{
+  max-width:1100px; margin:0 auto 18px; display:flex; flex-wrap:wrap; gap:10px;
+  align-items:center; justify-content:space-between;
+}
+.toolbar-group{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.toolbar h1{font-size:1.1rem}
+.toolbar p{margin:2px 0 0; font-size:.8rem; color:var(--muted)}
+.seg{display:flex; border:1.5px solid var(--border); border-radius:999px; padding:3px; background:var(--card)}
+.seg button{
+  border:none; background:none; padding:7px 14px; border-radius:999px; font-size:.82rem; font-weight:700;
+  color:var(--muted); cursor:pointer;
+}
+.seg button[aria-pressed="true"]{background:var(--amber); color:#2B1710}
+.demo-link{
+  font-size:.78rem; color:var(--amber-d); background:none; border:1.5px dashed var(--border);
+  padding:6px 12px; border-radius:999px; cursor:pointer; font-weight:700;
+}
+.demo-link[aria-pressed="true"]{background:var(--tomato-bg); border-color:var(--tomato); color:var(--tomato)}
+
+/* ---- live region (visually hidden) ---- */
+.visually-hidden{
+  position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+}
+
+/* ---- device frame ---- */
+.stage{max-width:1100px; margin:0 auto; display:flex; justify-content:center}
+.device{
+  width:100%; max-width:420px; background:var(--card); border:1px solid var(--border);
+  border-radius:28px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(43,23,16,.35);
+  display:flex; flex-direction:column; min-height:720px;
+}
+.device[data-mode="desktop"]{max-width:1040px; border-radius:16px; flex-direction:row}
+
+.app-body{flex:1; display:flex; flex-direction:column; min-width:0}
+.device[data-mode="desktop"] .app-body{flex-direction:row}
+
+/* status bar (phone chrome, hidden on desktop) */
+.statusbar{display:flex; justify-content:space-between; padding:14px 20px 0; font-weight:700; font-size:.8rem}
+.device[data-mode="desktop"] .statusbar{display:none}
+
+/* ---- nav ---- */
+nav.tabbar{
+  display:flex; border-top:1px solid var(--border); background:var(--card);
+}
+.device[data-mode="desktop"] nav.tabbar{
+  flex-direction:column; border-top:none; border-right:1px solid var(--border);
+  width:150px; flex:none; align-self:stretch; padding:24px 0; gap:2px;
+}
+nav.tabbar button{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 4px 14px; background:none; border:none; cursor:pointer; color:var(--muted); font-weight:600; font-size:.72rem;
+}
+.device[data-mode="desktop"] nav.tabbar button{
+  flex:none; flex-direction:row; justify-content:flex-start; gap:10px; padding:12px 24px; font-size:.85rem;
+}
+nav.tabbar button[aria-current="page"]{color:var(--amber-d)}
+nav.tabbar button svg{width:20px; height:20px}
+nav.tabbar button[disabled]{opacity:.4; cursor:not-allowed}
+
+/* ---- screens ---- */
+.screens{flex:1; min-width:0; padding:18px 20px 90px; overflow-y:auto}
+.device[data-mode="desktop"] .screens{padding:28px 36px}
+.screen{display:none}
+.screen.is-active{display:block; animation:fade .18s ease}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){.screen.is-active{animation:none}}
+
+.eyebrow{font-size:.75rem; color:var(--muted); margin:2px 0 14px}
+h2.title{font-size:1.25rem; font-weight:700}
+.back-row{display:flex; align-items:center; gap:10px; margin-bottom:2px}
+.back-btn{background:none; border:none; color:var(--ink); font-size:1.3rem; cursor:pointer; line-height:1; padding:4px}
+
+.desktop-grid{display:block}
+.device[data-mode="desktop"] .desktop-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:start}
+
+/* card */
+.card{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px}
+.card + .card{margin-top:16px}
+
+/* stepper */
+.stepper{display:flex; align-items:center; justify-content:center; gap:0; margin:18px 0 10px}
+.step{display:flex; flex-direction:column; align-items:center; gap:6px; width:92px}
+.step-circle{
+  width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  border:2px solid var(--border); background:var(--card); color:var(--muted);
+}
+.step.is-done .step-circle, .step.is-active .step-circle{border-color:var(--amber); color:var(--amber-d)}
+.step.is-active .step-circle{background:var(--amber-bg); border-width:2.5px}
+.step-label{font-size:.78rem; font-weight:600; color:var(--muted); text-align:center}
+.step.is-active .step-label{color:var(--amber-d)}
+.step.is-done .step-label{color:var(--ink)}
+.step-line{height:3px; width:48px; background:var(--border); margin-top:-32px}
+.step-line.is-filled{background:var(--amber)}
+
+/* chips */
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0}
+.chip{border:1.5px solid var(--border); background:var(--card); color:var(--ink); border-radius:999px; padding:7px 14px; font-size:.82rem; font-weight:600; cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--amber); border-color:var(--amber); color:#2B1710}
+
+/* dish items */
+.dish-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px}
+.device[data-mode="desktop"] .dish-grid{grid-template-columns:repeat(3,1fr)}
+.dish-list .dish{display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--border)}
+.dish-list .dish:last-child{border-bottom:none}
+.thumb{
+  width:64px; height:64px; border-radius:12px; background:var(--amber-bg); flex:none;
+  display:flex; align-items:center; justify-content:center; color:var(--amber-d);
+}
+.dish-card .thumb{width:100%; height:92px; border-radius:12px 12px 0 0}
+.dish-card{border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--card); display:flex; flex-direction:column}
+.dish-card .dish-info{padding:10px 12px 12px; display:flex; flex-direction:column; gap:3px}
+.dish-name{font-weight:700; font-size:.9rem}
+.tag{font-size:.74rem; font-weight:700; color:var(--sage)}
+.price-row{display:flex; justify-content:space-between; align-items:center; margin-top:4px}
+.price{font-weight:800}
+.add-btn{
+  width:34px; height:34px; border-radius:50%; background:var(--amber); color:#2B1710; border:none;
+  font-size:1.2rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.dish-list .dish-info{flex:1; min-width:0}
+
+/* buttons */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:999px;
+  padding:14px 22px; font-weight:700; font-size:.95rem; cursor:pointer; border:1.5px solid transparent; width:100%;
+}
+.btn-primary{background:var(--amber); color:#2B1710}
+.btn-primary:disabled{opacity:.5; cursor:not-allowed}
+.btn-secondary{background:var(--card); border-color:var(--ink); color:var(--ink)}
+.btn-ghost{background:none; color:var(--amber-d); text-decoration:underline; width:auto; padding:6px}
+.spinner{width:16px; height:16px; border-radius:50%; border:2.5px solid rgba(43,23,16,.3); border-top-color:#2B1710; animation:spin .7s linear infinite}
+@media (prefers-reduced-motion: reduce){.spinner{animation:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* banners / messages */
+.banner{display:flex; gap:10px; align-items:flex-start; padding:14px; border-radius:14px; font-size:.85rem; margin:14px 0}
+.banner-success{background:var(--sage-bg); color:var(--sage)}
+.banner-error{background:var(--tomato-bg); color:var(--tomato)}
+.banner-info{background:var(--amber-bg); color:var(--amber-d)}
+.banner b{display:block; margin-bottom:2px}
+.banner svg{flex:none; margin-top:1px}
+
+.empty-state{text-align:center; padding:50px 10px}
+.empty-state .thumb{margin:0 auto 14px; width:72px; height:72px}
+
+.row{display:flex; justify-content:space-between; font-size:.9rem; padding:6px 0}
+.row.total{font-weight:800; border-top:1px solid var(--border); margin-top:6px; padding-top:12px; font-size:1rem}
+.field-note{font-size:.78rem; color:var(--muted); margin-top:10px}
+
+.sr-announce{font-size:.78rem; color:var(--muted)}
+
+.toast{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:var(--ink); color:var(--bg);
+  padding:12px 20px; border-radius:999px; font-size:.85rem; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,.25);
+  opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:50;
+}
+.toast.is-shown{opacity:1; transform:translateX(-50%) translateY(-6px)}
+
+.checkbox-row{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-top:10px}
+[hidden]{display:none !important}
+</style>
+
+<a class="skip-link" href="#app-main">Saltar al contenido principal</a>
+<div aria-live="polite" class="visually-hidden" id="announcer"></div>
+
+<div class="toolbar">
+  <div>
+    <h1>NutriTurno — Prototipo interactivo</h1>
+    <p>Actividad 6 · Flujo prioritario: ver menú → pedir → pagar → seguir el estado</p>
+  </div>
+  <div class="toolbar-group">
+    <div class="seg" role="group" aria-label="Tamaño de pantalla">
+      <button id="btn-mobile" aria-pressed="true" onclick="setDevice('mobile')">📱 Móvil</button>
+      <button id="btn-desktop" aria-pressed="false" onclick="setDevice('desktop')">🖥️ Escritorio</button>
+    </div>
+    <button class="demo-link" id="btn-simerr" aria-pressed="false" onclick="toggleSimError()">Simular error de pago (demo)</button>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="device" id="device" data-mode="mobile" role="application" aria-label="Simulador de la app NutriTurno">
+    <div class="app-body">
+      <nav class="tabbar" aria-label="Navegación principal">
+        <button data-tab="menu" aria-current="page" onclick="goTab('menu')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>
+          Menú
+        </button>
+        <button data-tab="pedidos" onclick="goTab('pedidos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          Pedidos
+        </button>
+        <button disabled aria-disabled="true" title="Fuera del alcance de este prototipo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>
+          Cuenta
+        </button>
+        <button disabled aria-disabled="true" title="Fuera del alcance de este prototipo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><text x="12" y="16.5" font-size="11" text-anchor="middle" fill="currentColor" stroke="none">?</text></svg>
+          Soporte
+        </button>
+      </nav>
+
+      <main class="screens" id="app-main">
+        <div class="statusbar"><span>9:41</span><span>100%</span></div>
+
+        <!-- INICIO -->
+        <section class="screen is-active" id="screen-inicio" aria-labelledby="h-inicio">
+          <p class="eyebrow">Hola, Carlos</p>
+          <h2 class="title" id="h-inicio">NutriTurno</h2>
+          <div class="desktop-grid" style="margin-top:14px">
+            <div>
+              <div class="card" id="inicio-order-card" hidden>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                  <strong>Tu pedido</strong><span class="sr-announce" id="inicio-order-code"></span>
+                </div>
+                <div id="inicio-stepper-slot"></div>
+              </div>
+              <div class="banner banner-info" id="inicio-no-order" style="margin-top:14px">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+                <span>Aún no tienes un pedido activo hoy. Mira el menú y arma el tuyo.</span>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px">
+                <h3 style="font-size:1rem">Menú de hoy</h3>
+                <button class="btn-ghost" onclick="goTab('menu'); showScreen('menu-full')">Ver todo ›</button>
+              </div>
+              <div class="dish-grid" id="inicio-dish-preview"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MENU FULL -->
+        <section class="screen" id="screen-menu-full" aria-labelledby="h-menu">
+          <div class="back-row">
+            <button class="back-btn" aria-label="Volver a Inicio" onclick="showScreen('inicio')">‹</button>
+            <div>
+              <h2 class="title" id="h-menu">Menú de hoy</h2>
+              <p class="eyebrow" style="margin:2px 0 0" id="menu-count">5 platos disponibles</p>
+            </div>
+          </div>
+          <div class="chips" role="group" aria-label="Filtrar por restricción alimentaria" id="chip-group"></div>
+          <div class="banner banner-info" id="menu-empty" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+            <span>No hay platos que combinen esos filtros. Prueba quitando uno.</span>
+          </div>
+          <div class="dish-grid" id="menu-dish-list"></div>
+        </section>
+
+        <!-- CONFIRMAR -->
+        <section class="screen" id="screen-confirmar" aria-labelledby="h-confirmar">
+          <div class="back-row">
+            <button class="back-btn" aria-label="Volver al menú" onclick="showScreen('menu-full')">‹</button>
+            <div>
+              <h2 class="title" id="h-confirmar">Confirmar pedido</h2>
+              <p class="eyebrow" style="margin:2px 0 0">Revisa tu pedido antes de pagar</p>
+            </div>
+          </div>
+          <div class="desktop-grid">
+            <div>
+              <div class="card">
+                <strong>Tu pedido</strong>
+                <div id="cart-rows" style="margin-top:8px"></div>
+                <div class="row total"><span>Total</span><span id="cart-total">$0</span></div>
+              </div>
+              <div class="banner banner-info">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
+                <span>Recoger en Cafetería Piso 1 · listo en 15-20 min</span>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <strong>Método de pago</strong>
+                <div class="row" style="margin-top:10px"><span>Tarjeta •••• 4821</span><button class="btn-ghost" style="padding:0">Cambiar</button></div>
+              </div>
+              <div class="banner banner-error" id="confirmar-error" hidden role="alert">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+                <span id="confirmar-error-text">Agrega al menos un plato antes de continuar.</span>
+              </div>
+              <button class="btn btn-primary" id="btn-pagar" style="margin-top:14px" onclick="pagar()">
+                <span id="btn-pagar-label">Pagar <span id="btn-pagar-amount">$0</span></span>
+              </button>
+              <p class="field-note" style="text-align:center">Podrás seguir el estado desde Pedidos</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ESTADO -->
+        <section class="screen" id="screen-estado" aria-labelledby="h-estado">
+          <h2 class="title" id="h-estado">Estado del pedido</h2>
+          <p class="eyebrow" id="estado-code">Pedido #4821</p>
+
+          <div class="card" id="estado-vacio-card">
+            <div class="empty-state">
+              <div class="thumb" style="margin:0 auto 14px" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+              </div>
+              <p style="font-weight:700">No tienes un pedido activo</p>
+              <p class="field-note">Ve al menú y arma tu pedido para verlo aquí.</p>
+              <button class="btn btn-secondary" style="margin-top:14px; width:auto; padding:10px 20px" onclick="goTab('menu')">Ver menú</button>
+            </div>
+          </div>
+
+          <div id="estado-activo-card" hidden>
+            <div class="card">
+              <div class="stepper" id="estado-stepper"></div>
+              <p id="estado-msg" style="text-align:center; font-weight:700; margin-top:6px"></p>
+              <p id="estado-sub" style="text-align:center; color:var(--muted); font-size:.85rem; margin-top:2px"></p>
+            </div>
+            <div class="banner banner-success" style="margin-top:14px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>
+              <span>Notificación activada: te avisamos cuando esté listo.</span>
+            </div>
+            <div class="card">
+              <strong>Detalle del pedido</strong>
+              <div id="estado-cart-rows" style="margin-top:8px"></div>
+            </div>
+            <button class="btn btn-secondary" style="margin-top:14px" onclick="cancelarPedido()">Cancelar pedido</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const AMBER_D = '#B9741C';
+const DISHES = [
+  {id:'pollo', name:'Pollo al horno', tag:'Sin gluten', price:14500, diet:'sin-gluten'},
+  {id:'bowl', name:'Bowl vegetariano', tag:'Vegetariano', price:12000, diet:'vegetariano'},
+  {id:'sopa', name:'Sopa del día', tag:'Bajo en sodio', price:8500, diet:'bajo-sodio'},
+  {id:'arroz', name:'Arroz con pollo', tag:'', price:13000, diet:'ninguna'},
+  {id:'ensalada', name:'Ensalada César', tag:'Vegetariano', price:10500, diet:'vegetariano'},
+];
+const FILTERS = [
+  {id:'todos', label:'Todos'},
+  {id:'sin-gluten', label:'Sin gluten'},
+  {id:'vegetariano', label:'Vegetariano'},
+  {id:'bajo-sodio', label:'Bajo en sodio'},
+];
+let activeFilter = 'todos';
+let cart = {};        // id -> qty
+let order = null;     // {id, items, total, stage}
+let simError = false;
+
+function fmt(n){ return '$' + n.toLocaleString('es-CO'); }
+function announce(msg){ document.getElementById('announcer').textContent = msg; }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('is-shown');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('is-shown'), 2600);
+}
+
+function iconFor(dietOrState, size=16){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a8 8 0 1 1 16 0c0 4-3 6-3 9H7c0-3-3-5-3-9Z"/></svg>`;
+}
+
+function renderChips(){
+  const wrap = document.getElementById('chip-group');
+  wrap.innerHTML = FILTERS.map(f => `<button class="chip" aria-pressed="${f.id===activeFilter}" onclick="setFilter('${f.id}')">${f.label}</button>`).join('');
+}
+function setFilter(id){
+  activeFilter = id;
+  renderChips();
+  renderMenuFull();
+  announce('Filtro aplicado: ' + (FILTERS.find(f=>f.id===id)||{}).label);
+}
+function filteredDishes(){
+  return activeFilter==='todos' ? DISHES : DISHES.filter(d => d.diet===activeFilter);
+}
+
+function dishCardHTML(d){
+  const qty = cart[d.id]||0;
+  return `<div class="dish-card">
+    <div class="thumb" role="img" aria-label="Foto de ${d.name}">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="9" r="1.6" fill="currentColor" stroke="none"/><path d="M4 17l5-6 3 3.5L16 9l4 8"/></svg>
+    </div>
+    <div class="dish-info">
+      <span class="dish-name">${d.name}</span>
+      ${d.tag ? `<span class="tag">${d.tag}</span>` : ''}
+      <div class="price-row">
+        <span class="price">${fmt(d.price)}</span>
+        <button class="add-btn" aria-label="Agregar ${d.name} al pedido${qty?`, ${qty} en el carrito`:''}" onclick="addToCart('${d.id}')">+</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderInicioPreview(){
+  document.getElementById('inicio-dish-preview').innerHTML = DISHES.slice(0,2).map(dishCardHTML).join('');
+}
+function renderMenuFull(){
+  const list = filteredDishes();
+  document.getElementById('menu-count').textContent = list.length + ' plato' + (list.length===1?'':'s') + ' disponible' + (list.length===1?'':'s');
+  document.getElementById('menu-empty').hidden = list.length !== 0;
+  document.getElementById('menu-dish-list').innerHTML = list.map(dishCardHTML).join('');
+}
+
+function addToCart(id){
+  cart[id] = (cart[id]||0) + 1;
+  const d = DISHES.find(x=>x.id===id);
+  toast(`${d.name} agregado`);
+  announce(`${d.name} agregado al pedido`);
+  renderInicioPreview(); renderMenuFull();
+}
+
+function cartEntries(){
+  return Object.entries(cart).filter(([,q])=>q>0).map(([id,q])=>({...DISHES.find(d=>d.id===id), qty:q}));
+}
+function cartTotal(){ return cartEntries().reduce((s,e)=>s+e.price*e.qty,0); }
+
+function renderConfirmar(){
+  const entries = cartEntries();
+  const rowsHTML = entries.length
+    ? entries.map(e => `<div class="row"><span>${e.qty}x&nbsp; ${e.name}</span><span>${fmt(e.price*e.qty)}</span></div>`).join('')
+    : `<p class="field-note">Tu pedido está vacío.</p>`;
+  document.getElementById('cart-rows').innerHTML = rowsHTML;
+  const total = cartTotal();
+  document.getElementById('cart-total').textContent = fmt(total);
+  document.getElementById('btn-pagar-amount').textContent = fmt(total);
+  const btn = document.getElementById('btn-pagar');
+  const err = document.getElementById('confirmar-error');
+  if (entries.length === 0){
+    btn.disabled = true; btn.setAttribute('aria-disabled','true');
+    err.hidden = false;
+    document.getElementById('confirmar-error-text').textContent = 'Agrega al menos un plato antes de continuar.';
+  } else {
+    btn.disabled = false; btn.removeAttribute('aria-disabled');
+    err.hidden = true;
+  }
+}
+
+function toggleSimError(){
+  simError = !simError;
+  document.getElementById('btn-simerr').setAttribute('aria-pressed', String(simError));
+  announce(simError ? 'Simulación de error de pago activada' : 'Simulación de error de pago desactivada');
+}
+
+function pagar(){
+  const entries = cartEntries();
+  if (entries.length === 0) return;
+  const btn = document.getElementById('btn-pagar');
+  const label = document.getElementById('btn-pagar-label');
+  btn.disabled = true;
+  const prevHTML = label.innerHTML;
+  label.innerHTML = '<span class="spinner" aria-hidden="true"></span> Procesando pago…';
+  announce('Procesando el pago, un momento.');
+  setTimeout(() => {
+    if (simError){
+      label.innerHTML = prevHTML;
+      btn.disabled = false;
+      const err = document.getElementById('confirmar-error');
+      err.hidden = false;
+      document.getElementById('confirmar-error-text').textContent = 'No pudimos procesar el pago. Verifica tu tarjeta e intenta de nuevo.';
+      announce('El pago no se pudo procesar. Verifica tu método de pago.');
+      return;
+    }
+    order = { id: '4821', items: entries, total: cartTotal(), stage: 0 };
+    cart = {};
+    renderInicioPreview(); renderMenuFull();
+    label.innerHTML = prevHTML;
+    btn.disabled = false;
+    goTab('pedidos');
+    showScreen('estado');
+    renderEstado();
+    announce('Pago confirmado. Tu pedido fue recibido.');
+    setTimeout(() => { if(order){ order.stage = 1; renderEstado(); toast('Tu pedido está en preparación'); announce('Tu pedido está en preparación.'); } }, 2600);
+  }, 1300);
+}
+
+const STAGE_LABELS = ['Recibido','En preparación','Listo'];
+function renderEstado(){
+  const hasOrder = !!order;
+  document.getElementById('estado-vacio-card').hidden = hasOrder;
+  document.getElementById('estado-activo-card').hidden = !hasOrder;
+  document.getElementById('estado-code').hidden = !hasOrder;
+  if (!hasOrder) return;
+  document.getElementById('estado-code').textContent = 'Pedido #' + order.id;
+  const stepperHTML = STAGE_LABELS.map((label,i) => {
+    const cls = i < order.stage ? 'is-done' : i === order.stage ? 'is-active' : '';
+    const line = i > 0 ? `<div class="step-line ${i<=order.stage?'is-filled':''}"></div>` : '';
+    const svgs = [
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>',
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="11" r="7"/><rect x="6" y="5" width="12" height="3" rx="1.5" fill="currentColor" stroke="none"/></svg>',
+      '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>'
+    ];
+    return line + `<div class="step ${cls}">
+        <div class="step-circle" aria-hidden="true">${svgs[i]}</div>
+        <div class="step-label">${label}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('estado-stepper').innerHTML = stepperHTML;
+  const msgs = ['Recibimos tu pedido','Tu pedido se está preparando','¡Tu pedido está listo para recoger!'];
+  document.getElementById('estado-msg').textContent = msgs[order.stage];
+  document.getElementById('estado-sub').textContent = order.stage < 2 ? 'Tiempo estimado: 12 minutos' : 'Recógelo en Cafetería Piso 1';
+  document.getElementById('estado-cart-rows').innerHTML = order.items.map(e => `<div class="row"><span>${e.qty}x&nbsp; ${e.name}</span><span>${fmt(e.price*e.qty)}</span></div>`).join('')
+    + `<div class="row total"><span>Total</span><span>${fmt(order.total)}</span></div>`;
+}
+function cancelarPedido(){
+  order = null;
+  renderEstado();
+  toast('Pedido cancelado');
+  announce('Pedido cancelado.');
+}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('is-active'));
+  document.getElementById('screen-' + name).classList.add('is-active');
+  document.getElementById('app-main').scrollTop = 0;
+  if (name === 'confirmar') renderConfirmar();
+  if (name === 'estado') renderEstado();
+}
+function goTab(tab){
+  document.querySelectorAll('.tabbar button[data-tab]').forEach(b => {
+    if (b.dataset.tab === tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  if (tab === 'menu') showScreen('inicio');
+  if (tab === 'pedidos') showScreen('estado');
+}
+
+function setDevice(mode){
+  document.getElementById('device').dataset.mode = mode;
+  document.getElementById('btn-mobile').setAttribute('aria-pressed', String(mode==='mobile'));
+  document.getElementById('btn-desktop').setAttribute('aria-pressed', String(mode==='desktop'));
+}
+
+// expose the "ver pedido" action from menu screen once something is in the cart
+function goToConfirmarIfPossible(){ showScreen('confirmar'); }
+
+// floating "ver pedido" affordance: add a persistent button by wiring into renderMenuFull's parent flow
+(function initGoToCart(){
+  const observer = () => {
+    const entries = cartEntries();
+    let bar = document.getElementById('cart-fab');
+    if (entries.length > 0){
+      if (!bar){
+        bar = document.createElement('button');
+        bar.id = 'cart-fab';
+        bar.className = 'btn btn-primary';
+        bar.style.cssText = 'position:sticky; bottom:8px; margin-top:16px;';
+        bar.onclick = () => showScreen('confirmar');
+        document.getElementById('screen-menu-full').appendChild(bar);
+      }
+      bar.textContent = `Ver pedido (${entries.reduce((s,e)=>s+e.qty,0)}) · ${fmt(cartTotal())}`;
+    } else if (bar){ bar.remove(); }
+  };
+  const origAdd = addToCart;
+  addToCart = function(id){ origAdd(id); observer(); };
+  window.addEventListener('DOMContentLoaded', observer);
+})();
+
+renderChips();
+renderInicioPreview();
+renderMenuFull();
+renderEstado();
+</script>

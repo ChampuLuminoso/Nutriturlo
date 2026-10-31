@@ -85,6 +85,15 @@ button{font-family:inherit}
   padding:6px 12px; border-radius:999px; cursor:pointer; font-weight:700;
 }
 .demo-link[aria-pressed="true"]{background:var(--tomato-bg); border-color:var(--tomato); color:var(--tomato)}
+.demo-link:disabled{opacity:.45; cursor:not-allowed}
+.demo-time{
+  font-size:.78rem; color:var(--amber-d); font-weight:700; display:flex; align-items:center; gap:6px;
+  border:1.5px dashed var(--border); padding:6px 12px; border-radius:999px;
+}
+.demo-time input{
+  width:52px; border:1px solid var(--border); border-radius:8px; padding:3px 6px; font:inherit; font-weight:700;
+  color:var(--ink); background:var(--card);
+}
 
 /* ---- live region (visually hidden) ---- */
 .visually-hidden{
@@ -231,6 +240,42 @@ h2.title{font-size:1.5rem; font-weight:700}
 .toast.is-shown{opacity:1; transform:translateX(-50%) translateY(-6px)}
 
 .checkbox-row{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-top:10px}
+
+/* name fields */
+.name-fields{display:flex; gap:10px; margin-top:10px}
+.name-fields label{flex:1; display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:700; color:var(--muted)}
+.name-fields input{
+  font:inherit; font-size:.95rem; font-weight:600; color:var(--ink); background:var(--card);
+  border:1.5px solid var(--border); border-radius:10px; padding:10px 12px;
+}
+.name-fields input:focus-visible{outline:3px solid var(--amber-d); outline-offset:1px}
+
+/* prep-time progress bar */
+.progress-track{
+  height:10px; border-radius:999px; background:var(--amber-bg); margin:16px auto 0; max-width:320px; overflow:hidden;
+}
+.progress-fill{height:100%; width:0%; background:var(--amber); border-radius:999px; transition:width 1s linear}
+
+/* ready modal */
+.ready-modal{
+  position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center;
+  background:rgba(43,23,16,.55); padding:20px;
+  padding-left:max(20px, env(safe-area-inset-left,0px)); padding-right:max(20px, env(safe-area-inset-right,0px));
+}
+.ready-modal-card{
+  background:var(--card); border-radius:22px; padding:32px 28px; max-width:360px; width:100%;
+  text-align:center; box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  animation:ready-pop .35s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes ready-pop{from{opacity:0; transform:scale(.85) translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){.ready-modal-card{animation:none}}
+.ready-modal-icon{
+  width:64px; height:64px; margin:0 auto 14px; border-radius:50%; background:var(--sage-bg); color:var(--sage);
+  display:flex; align-items:center; justify-content:center;
+}
+.ready-modal-card h2{font-size:1.2rem; line-height:1.3; margin-bottom:8px}
+.ready-modal-card p{color:var(--muted); font-size:.9rem; margin:0 0 18px}
+.ready-modal-card .btn{margin-top:4px}
 [hidden]{display:none !important}
 </style>
 
@@ -249,6 +294,10 @@ h2.title{font-size:1.5rem; font-weight:700}
       <button id="btn-desktop" aria-pressed="false" onclick="setDevice('desktop')">🖥️ Escritorio</button>
     </div>
     <button class="demo-link" id="btn-simerr" aria-pressed="false" onclick="toggleSimError()">Simular error de pago (demo)</button>
+    <label class="demo-time" for="demo-prep-seconds">⏱️ Tiempo de preparación
+      <input type="number" id="demo-prep-seconds" min="5" max="180" step="1" value="25"> seg
+    </label>
+    <button class="demo-link" id="btn-acelerar" onclick="acelerarPedido()">⏩ Adelantar a "Listo" (demo)</button>
   </div>
 </div>
 
@@ -279,7 +328,7 @@ h2.title{font-size:1.5rem; font-weight:700}
 
         <!-- INICIO -->
         <section class="screen is-active" id="screen-inicio" aria-labelledby="h-inicio">
-          <p class="eyebrow">Hola, Carlos</p>
+          <p class="eyebrow" id="inicio-greeting">Hola, Carlos</p>
           <h2 class="title" id="h-inicio">NutriTurno</h2>
           <div class="desktop-grid" style="margin-top:14px">
             <div>
@@ -333,6 +382,14 @@ h2.title{font-size:1.5rem; font-weight:700}
           <div class="desktop-grid">
             <div>
               <div class="card">
+                <strong>Tus datos</strong>
+                <div class="name-fields">
+                  <label>Nombre<input type="text" id="input-nombre" value="Carlos" autocomplete="given-name"></label>
+                  <label>Apellido<input type="text" id="input-apellido" value="Pérez" autocomplete="family-name"></label>
+                </div>
+                <p class="field-note">Con esto te saludamos y así te avisamos cuando tu pedido esté listo.</p>
+              </div>
+              <div class="card">
                 <strong>Tu pedido</strong>
                 <div id="cart-rows" style="margin-top:8px"></div>
                 <div class="row total"><span>Total</span><span id="cart-total">$0</span></div>
@@ -378,7 +435,10 @@ h2.title{font-size:1.5rem; font-weight:700}
           <div id="estado-activo-card" hidden>
             <div class="card">
               <div class="stepper" id="estado-stepper"></div>
-              <p id="estado-msg" style="text-align:center; font-weight:700; margin-top:6px"></p>
+              <div class="progress-track" id="estado-progress-track" aria-hidden="true">
+                <div class="progress-fill" id="estado-progress"></div>
+              </div>
+              <p id="estado-msg" style="text-align:center; font-weight:700; margin-top:10px"></p>
               <p id="estado-sub" style="text-align:center; color:var(--muted); font-size:.85rem; margin-top:2px"></p>
             </div>
             <div class="banner banner-success" style="margin-top:14px">
@@ -398,6 +458,17 @@ h2.title{font-size:1.5rem; font-weight:700}
 </div>
 
 <div class="toast" id="toast" role="status"></div>
+
+<div class="ready-modal" id="ready-modal" hidden>
+  <div class="ready-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="ready-modal-title" aria-describedby="ready-modal-sub">
+    <div class="ready-modal-icon" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+    </div>
+    <h2 id="ready-modal-title">¡TU PEDIDO ESTÁ LISTO PARA COMER!</h2>
+    <p id="ready-modal-sub"></p>
+    <button class="btn btn-primary" id="btn-ready-ok" onclick="closeReadyModal()">OK, ¡gracias!</button>
+  </div>
+</div>
 
 <script>
 const AMBER_D = '#B9741C';
@@ -519,9 +590,103 @@ function toggleSimError(){
   announce(simError ? 'Simulación de error de pago activada' : 'Simulación de error de pago desactivada');
 }
 
+let customerName = 'Carlos';
+
+/* ---- sound: synthesized beep (no external audio file, so it works fully offline) ---- */
+let audioCtx = null;
+let readyLoopHandle = null;
+function unlockAudio(){
+  if (!audioCtx){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+}
+function playBeepPair(){
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [0, .16].forEach((offset, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(i===0 ? 880 : 1174.7, now + offset);
+    gain.gain.setValueAtTime(0.0001, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.22, now + offset + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.14);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now + offset); osc.stop(now + offset + 0.16);
+  });
+}
+function startReadyLoop(){
+  unlockAudio();
+  playBeepPair();
+  clearInterval(readyLoopHandle);
+  readyLoopHandle = setInterval(playBeepPair, 900);
+}
+function stopReadyLoop(){
+  clearInterval(readyLoopHandle);
+  readyLoopHandle = null;
+}
+
+function openReadyModal(){
+  document.getElementById('ready-modal-sub').textContent =
+    `${customerName}, recógelo en Cafetería Piso 1. Suena hasta que confirmes aquí abajo.`;
+  const modal = document.getElementById('ready-modal');
+  modal.hidden = false;
+  document.getElementById('btn-ready-ok').focus();
+  startReadyLoop();
+  announce(`¡Tu pedido está listo para comer, ${customerName}!`);
+}
+function closeReadyModal(){
+  document.getElementById('ready-modal').hidden = true;
+  stopReadyLoop();
+  announce('Notificación confirmada.');
+}
+
+/* ---- prep-time countdown ---- */
+let orderTimerHandle = null;
+function fmtTime(s){
+  s = Math.max(0, Math.round(s));
+  const m = Math.floor(s/60), r = s%60;
+  return m + ':' + String(r).padStart(2,'0');
+}
+function startOrderTimer(){
+  clearInterval(orderTimerHandle);
+  orderTimerHandle = setInterval(() => {
+    if (!order) { clearInterval(orderTimerHandle); return; }
+    order.remaining = Math.max(0, order.remaining - 1);
+    updateStageFromRemaining();
+    renderEstado();
+    if (order.remaining <= 0){
+      clearInterval(orderTimerHandle);
+      orderTimerHandle = null;
+      if (order.stage < 2){ order.stage = 2; renderEstado(); }
+      openReadyModal();
+    }
+  }, 1000);
+}
+function updateStageFromRemaining(){
+  if (!order) return;
+  const frac = 1 - (order.remaining / order.totalSeconds);
+  if (order.remaining <= 0) order.stage = 2;
+  else if (frac >= 1/3) order.stage = 1;
+  else order.stage = 0;
+}
+function acelerarPedido(){
+  if (!order || order.stage === 2){ toast('No hay un pedido en preparación'); return; }
+  unlockAudio();
+  order.remaining = Math.min(order.remaining, 2);
+  announce('Adelantando el tiempo de preparación.');
+}
+
 function pagar(){
   const entries = cartEntries();
   if (entries.length === 0) return;
+  unlockAudio();
+  const nombre = (document.getElementById('input-nombre').value || '').trim();
+  const apellido = (document.getElementById('input-apellido').value || '').trim();
+  customerName = [nombre, apellido].filter(Boolean).join(' ') || 'Cliente';
+  document.getElementById('inicio-greeting').textContent = 'Hola, ' + (nombre || customerName);
   const btn = document.getElementById('btn-pagar');
   const label = document.getElementById('btn-pagar-label');
   btn.disabled = true;
@@ -538,7 +703,8 @@ function pagar(){
       announce('El pago no se pudo procesar. Verifica tu método de pago.');
       return;
     }
-    order = { id: '4821', items: entries, total: cartTotal(), stage: 0 };
+    const totalSeconds = Math.max(5, Math.min(180, Number(document.getElementById('demo-prep-seconds').value) || 25));
+    order = { id: '4821', items: entries, total: cartTotal(), stage: 0, totalSeconds, remaining: totalSeconds, customerName };
     cart = {};
     renderInicioPreview(); renderMenuFull();
     label.innerHTML = prevHTML;
@@ -546,8 +712,8 @@ function pagar(){
     goTab('pedidos');
     showScreen('estado');
     renderEstado();
+    startOrderTimer();
     announce('Pago confirmado. Tu pedido fue recibido.');
-    setTimeout(() => { if(order){ order.stage = 1; renderEstado(); toast('Tu pedido está en preparación'); announce('Tu pedido está en preparación.'); } }, 2600);
   }, 1300);
 }
 
@@ -558,7 +724,7 @@ function renderEstado(){
   document.getElementById('estado-activo-card').hidden = !hasOrder;
   document.getElementById('estado-code').hidden = !hasOrder;
   if (!hasOrder) return;
-  document.getElementById('estado-code').textContent = 'Pedido #' + order.id;
+  document.getElementById('estado-code').textContent = 'Pedido #' + order.id + ' · ' + order.customerName;
   const stepperHTML = STAGE_LABELS.map((label,i) => {
     const cls = i < order.stage ? 'is-done' : i === order.stage ? 'is-active' : '';
     const line = i > 0 ? `<div class="step-line ${i<=order.stage?'is-filled':''}"></div>` : '';
@@ -575,12 +741,20 @@ function renderEstado(){
   document.getElementById('estado-stepper').innerHTML = stepperHTML;
   const msgs = ['Recibimos tu pedido','Tu pedido se está preparando','¡Tu pedido está listo para recoger!'];
   document.getElementById('estado-msg').textContent = msgs[order.stage];
-  document.getElementById('estado-sub').textContent = order.stage < 2 ? 'Tiempo estimado: 12 minutos' : 'Recógelo en Cafetería Piso 1';
+  const pct = order.totalSeconds ? Math.min(100, Math.round((1 - order.remaining/order.totalSeconds)*100)) : 100;
+  document.getElementById('estado-progress').style.width = pct + '%';
+  document.getElementById('estado-progress-track').hidden = order.stage === 2;
+  document.getElementById('estado-sub').textContent = order.stage < 2
+    ? 'Listo en ' + fmtTime(order.remaining)
+    : 'Recógelo en Cafetería Piso 1';
   document.getElementById('estado-cart-rows').innerHTML = order.items.map(e => `<div class="row"><span>${e.qty}x&nbsp; ${e.name}</span><span>${fmt(e.price*e.qty)}</span></div>`).join('')
     + `<div class="row total"><span>Total</span><span>${fmt(order.total)}</span></div>`;
 }
 function cancelarPedido(){
   order = null;
+  clearInterval(orderTimerHandle);
+  orderTimerHandle = null;
+  closeReadyModal();
   renderEstado();
   toast('Pedido cancelado');
   announce('Pedido cancelado.');

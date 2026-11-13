@@ -179,6 +179,9 @@ h2.title{font-size:1.5rem; font-weight:700}
 /* dish items */
 .dish-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px}
 .device[data-mode="desktop"] .dish-grid{grid-template-columns:repeat(3,1fr); gap:24px}
+/* on the 2-col mobile layout, a lone 3rd preview card spans the full row instead of leaving an empty, cropped-looking slot */
+#inicio-dish-preview.dish-grid > .dish-card:nth-child(3):last-child{grid-column:1 / -1}
+.device[data-mode="desktop"] #inicio-dish-preview.dish-grid > .dish-card:nth-child(3):last-child{grid-column:auto}
 .dish-list .dish{display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--border)}
 .dish-list .dish:last-child{border-bottom:none}
 .thumb{
@@ -197,9 +200,11 @@ h2.title{font-size:1.5rem; font-weight:700}
 .price-row{display:flex; justify-content:space-between; align-items:center; margin-top:6px}
 .price{font-weight:800; font-size:1.05rem}
 .add-btn{
-  width:40px; height:40px; border-radius:50%; background:var(--amber); color:#2B1710; border:none;
-  font-size:1.35rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  width:48px; height:48px; border-radius:50%; background:var(--amber); color:#2B1710;
+  border:2px solid #2B1710; box-shadow:0 2px 8px rgba(0,0,0,.35);
+  font-size:1.6rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
+.add-btn:hover, .add-btn:focus-visible{transform:scale(1.06); outline:3px solid #fff; outline-offset:2px}
 .dish-list .dish-info{flex:1; min-width:0}
 
 /* buttons */
@@ -239,6 +244,22 @@ h2.title{font-size:1.5rem; font-weight:700}
 }
 .toast.is-shown{opacity:1; transform:translateX(-50%) translateY(-6px)}
 
+/* photo lightbox */
+.lightbox{
+  position:fixed; inset:0; background:rgba(20,12,8,.86); display:flex; align-items:center; justify-content:center;
+  padding:24px; z-index:60; opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.lightbox.is-open{opacity:1; pointer-events:auto}
+.lightbox-card{max-width:min(480px,92vw); width:100%; background:var(--card); border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.lightbox-card img{width:100%; display:block; aspect-ratio:4/3; object-fit:cover}
+.lightbox-body{padding:16px 18px 20px}
+.lightbox-close{
+  position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none;
+  background:rgba(20,12,8,.65); color:#fff; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.thumb{cursor:zoom-in}
+.thumb:focus-visible{outline:3px solid var(--amber-d); outline-offset:2px}
+
 .checkbox-row{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-top:10px}
 
 /* name fields */
@@ -262,7 +283,13 @@ h2.title{font-size:1.5rem; font-weight:700}
 /* per-dish note in the cart */
 .cart-row-note{display:flex; flex-direction:column; gap:6px; padding:10px 0; border-bottom:1px solid var(--border)}
 .cart-row-note:last-child{border-bottom:none}
-.cart-row-note .row-main{display:flex; justify-content:space-between; font-size:.9rem}
+.cart-row-note .row-main{display:flex; justify-content:space-between; align-items:center; font-size:.9rem; gap:10px}
+.cart-row-note .row-main .row-label{flex:1; min-width:0}
+.remove-btn{
+  flex:none; width:30px; height:30px; border-radius:50%; border:1.5px solid var(--tomato); background:var(--tomato-bg);
+  color:var(--tomato); font-size:1rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.remove-btn:hover, .remove-btn:focus-visible{outline:2px solid var(--tomato); outline-offset:1px}
 .note-input{
   font:inherit; font-size:.8rem; border:1px solid var(--border); border-radius:8px; padding:7px 10px;
   background:var(--bg); color:var(--ink);
@@ -387,6 +414,7 @@ h2.title{font-size:1.5rem; font-weight:700}
                 <button class="btn-ghost" onclick="goTab('menu'); showScreen('menu-full')" data-i18n="see_all">Ver todo ›</button>
               </div>
               <div class="dish-grid" id="inicio-dish-preview"></div>
+              <button class="btn btn-secondary" style="margin-top:16px" onclick="goTab('menu'); showScreen('menu-full')" data-i18n="see_full_menu">Ver menú completo ›</button>
             </div>
           </div>
         </section>
@@ -534,6 +562,14 @@ h2.title{font-size:1.5rem; font-weight:700}
   </div>
 </div>
 
+<div class="lightbox" id="photo-lightbox" aria-hidden="true" onclick="if(event.target===this) closeLightbox()">
+  <div class="lightbox-card" style="position:relative" role="dialog" aria-modal="true">
+    <button class="lightbox-close" id="lightbox-close-btn" aria-label="Cerrar" onclick="closeLightbox()">✕</button>
+    <img src="" alt="">
+    <div class="lightbox-body"></div>
+  </div>
+</div>
+
 <script>
 const AMBER_D = '#B9741C';
 const DISHES = [
@@ -584,7 +620,7 @@ const STR = {
     nav_menu:'Menú', nav_pedidos:'Pedidos', nav_cuenta:'Cuenta', nav_soporte:'Soporte',
     greeting:'Hola,',
     no_order:'Aún no tienes un pedido activo hoy. Mira el menú y arma el tuyo.',
-    menu_today:'Menú de hoy', see_all:'Ver todo ›',
+    menu_today:'Menú de hoy', see_all:'Ver todo ›', see_full_menu:'Ver menú completo ›',
     back_inicio:'Volver a Inicio', back_menu:'Volver al menú',
     no_match:'No hay platos que combinen esos filtros. Prueba quitando uno.',
     photo_of: name => `Foto de ${name}`,
@@ -594,6 +630,10 @@ const STR = {
     added_announce: name => `${name} agregado al pedido`,
     fav_add: name => `${name} agregado a favoritos`,
     fav_remove: name => `${name} quitado de favoritos`,
+    zoom_photo: name => `Ver foto de ${name} en grande`,
+    remove_item: name => `Quitar ${name} del pedido`,
+    removed: name => `${name} quitado del pedido`,
+    removed_announce: name => `${name} quitado del pedido`,
     confirm_title:'Confirmar pedido', confirm_sub:'Revisa tu pedido antes de pagar',
     your_data:'Tus datos', label_nombre:'Nombre', label_apellido:'Apellido',
     data_note:'Con esto te saludamos y así te avisamos cuando tu pedido esté listo.',
@@ -644,7 +684,7 @@ const STR = {
     nav_menu:'Menu', nav_pedidos:'Orders', nav_cuenta:'Account', nav_soporte:'Support',
     greeting:'Hi,',
     no_order:"You don't have an active order yet today. Check the menu and build yours.",
-    menu_today:"Today's menu", see_all:'See all ›',
+    menu_today:"Today's menu", see_all:'See all ›', see_full_menu:'See full menu ›',
     back_inicio:'Back to Home', back_menu:'Back to menu',
     no_match:'No dishes match those filters. Try removing one.',
     photo_of: name => `Photo of ${name}`,
@@ -654,6 +694,10 @@ const STR = {
     added_announce: name => `${name} added to your order`,
     fav_add: name => `${name} added to favorites`,
     fav_remove: name => `${name} removed from favorites`,
+    zoom_photo: name => `View larger photo of ${name}`,
+    remove_item: name => `Remove ${name} from order`,
+    removed: name => `${name} removed`,
+    removed_announce: name => `${name} removed from your order`,
     confirm_title:'Confirm order', confirm_sub:'Review your order before paying',
     your_data:'Your details', label_nombre:'First name', label_apellido:'Last name',
     data_note:"We'll use this to greet you and to let you know when your order is ready.",
@@ -806,9 +850,9 @@ function dishCardHTML(d){
     ? `<img src="${d.img}" alt="" loading="lazy">`
     : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="9" r="1.6" fill="currentColor" stroke="none"/><path d="M4 17l5-6 3 3.5L16 9l4 8"/></svg>`;
   return `<div class="dish-card">
-    <div class="thumb" role="img" aria-label="${T('photo_of', name)}">
+    <div class="thumb" role="button" tabindex="0" aria-label="${T('zoom_photo', name)}" onclick="openLightbox('${d.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLightbox('${d.id}')}">
       ${thumbInner}
-      <button class="fav-btn" aria-pressed="${fav}" aria-label="${fav ? T('fav_remove', name) : T('fav_add', name)}" onclick="toggleFavorite('${d.id}')">${fav ? '★' : '☆'}</button>
+      <button class="fav-btn" aria-pressed="${fav}" aria-label="${fav ? T('fav_remove', name) : T('fav_add', name)}" onclick="event.stopPropagation(); toggleFavorite('${d.id}')">${fav ? '★' : '☆'}</button>
     </div>
     <div class="dish-info">
       <span class="dish-name">${name}</span>
@@ -821,8 +865,34 @@ function dishCardHTML(d){
   </div>`;
 }
 
+function openLightbox(id){
+  const d = DISHES.find(x=>x.id===id);
+  if (!d) return;
+  const name = dishName(d), tag = dishTag(d);
+  const box = document.getElementById('photo-lightbox');
+  box.querySelector('.lightbox-body').innerHTML = `
+    <span class="dish-name">${name}</span>
+    ${tag ? `<div class="tag" style="margin-top:4px">${tag}</div>` : ''}
+    <div class="price-row" style="margin-top:10px">
+      <span class="price">${fmt(d.price)}</span>
+      <button class="add-btn" aria-label="${T('add_to_cart', name)}" onclick="addToCart('${d.id}'); closeLightbox()">+</button>
+    </div>`;
+  box.querySelector('img').src = d.img || '';
+  box.classList.add('is-open');
+  box.setAttribute('aria-hidden','false');
+  document.getElementById('lightbox-close-btn').focus();
+}
+function closeLightbox(){
+  const box = document.getElementById('photo-lightbox');
+  box.classList.remove('is-open');
+  box.setAttribute('aria-hidden','true');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('photo-lightbox').classList.contains('is-open')) closeLightbox();
+});
+
 function renderInicioPreview(){
-  document.getElementById('inicio-dish-preview').innerHTML = DISHES.slice(0,2).map(dishCardHTML).join('');
+  document.getElementById('inicio-dish-preview').innerHTML = DISHES.slice(0,3).map(dishCardHTML).join('');
 }
 function renderMenuFull(){
   const list = filteredDishes();
@@ -839,6 +909,15 @@ function addToCart(id){
   renderInicioPreview(); renderMenuFull();
 }
 
+function removeFromCart(id){
+  const d = DISHES.find(x=>x.id===id);
+  delete cart[id];
+  delete cartNotes[id];
+  toast(T('removed', dishName(d)));
+  announce(T('removed_announce', dishName(d)));
+  renderInicioPreview(); renderMenuFull(); renderConfirmar();
+}
+
 function cartEntries(){
   return Object.entries(cart).filter(([,q])=>q>0).map(([id,q])=>({...DISHES.find(d=>d.id===id), qty:q}));
 }
@@ -849,7 +928,11 @@ function renderConfirmar(){
   const rowsHTML = entries.length
     ? entries.map(e => `
       <div class="cart-row-note">
-        <div class="row-main"><span>${e.qty}x&nbsp; ${dishName(e)}</span><span>${fmt(e.price*e.qty)}</span></div>
+        <div class="row-main">
+          <span class="row-label">${e.qty}x&nbsp; ${dishName(e)}</span>
+          <span>${fmt(e.price*e.qty)}</span>
+          <button class="remove-btn" aria-label="${T('remove_item', dishName(e))}" onclick="removeFromCart('${e.id}')">✕</button>
+        </div>
         <input type="text" class="note-input" placeholder="${T('note_placeholder')}" value="${escapeHtml(cartNotes[e.id]||'')}" oninput="cartNotes['${e.id}']=this.value">
       </div>`).join('')
     : `<p class="field-note">${T('empty_cart')}</p>`;

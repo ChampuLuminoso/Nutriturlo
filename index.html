@@ -69,7 +69,7 @@ button{font-family:inherit}
 
 /* ---- top toolbar (demo controls, not part of the app itself) ---- */
 .toolbar{
-  max-width:1100px; margin:0 auto 18px; display:flex; flex-wrap:wrap; gap:10px;
+  max-width:1560px; margin:0 auto 18px; display:flex; flex-wrap:wrap; gap:10px;
   align-items:center; justify-content:space-between;
 }
 .toolbar-group{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
@@ -103,13 +103,13 @@ button{font-family:inherit}
 }
 
 /* ---- device frame ---- */
-.stage{max-width:1100px; margin:0 auto; display:flex; justify-content:center}
+.stage{max-width:1560px; margin:0 auto; display:flex; justify-content:center}
 .device{
   width:100%; max-width:480px; background:var(--card); border:1px solid var(--border);
   border-radius:28px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(43,23,16,.35);
   display:flex; flex-direction:column; min-height:780px;
 }
-.device[data-mode="desktop"]{max-width:1360px; border-radius:16px; flex-direction:row; min-height:860px}
+.device[data-mode="desktop"]{max-width:1560px; border-radius:16px; flex-direction:row; min-height:860px}
 
 .app-body{flex:1; display:flex; flex-direction:column; min-width:0}
 .device[data-mode="desktop"] .app-body{flex-direction:row}
@@ -212,6 +212,8 @@ h2.title{font-size:1.5rem; font-weight:700}
 
 /* ---- Alpha 1 additions ---- */
 .dish-card{min-width:0}
+.dish-card .dish-info{flex:1}
+.dish-card .price-row{margin-top:auto; padding-top:8px}
 .price-row{gap:8px}
 .device[data-mode="desktop"] .dish-grid{grid-template-columns:repeat(auto-fill, minmax(220px, 1fr))}
 .device[data-mode="desktop"] #screen-inicio .desktop-grid{grid-template-columns:1fr; gap:6px}
@@ -1131,9 +1133,17 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('photo-lightbox').classList.contains('is-open')) closeLightbox();
 });
 
-function renderInicioPreview(){
-  document.getElementById('inicio-dish-preview').innerHTML = DISHES.slice(0,3).map(dishCardHTML).join('');
+function inicioPreviewCount(){
+  if (document.getElementById('device').dataset.mode !== 'desktop') return 3;      // phone layout stays as it was
+  const el = document.getElementById('inicio-dish-preview');
+  const w = (el && el.clientWidth) || (window.innerWidth - 320);
+  const cols = Math.max(2, Math.floor((w + 24) / (220 + 24)));
+  return Math.max(cols, Math.floor(Math.min(DISHES.length, cols * 2) / cols) * cols);   // only complete rows, no orphan cards
 }
+function renderInicioPreview(){
+  document.getElementById('inicio-dish-preview').innerHTML = DISHES.slice(0, inicioPreviewCount()).map(dishCardHTML).join('');
+}
+let _rsz; window.addEventListener('resize', () => { clearTimeout(_rsz); _rsz = setTimeout(renderInicioPreview, 150); });
 function renderMenuFull(){
   const list = filteredDishes();
   document.getElementById('menu-count').textContent = T('dishes_available', list.length);
@@ -1868,6 +1878,7 @@ function setDevice(mode){
   document.getElementById('device').dataset.mode = mode;
   document.getElementById('btn-mobile').setAttribute('aria-pressed', String(mode==='mobile'));
   document.getElementById('btn-desktop').setAttribute('aria-pressed', String(mode==='desktop'));
+  renderInicioPreview();
 }
 
 /* the old sticky bottom cart bar was replaced by the floating bubble (see updateBubble) */

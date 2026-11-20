@@ -1,5 +1,6 @@
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>NutriTurno Prototipo</title>
+<title>NutriTurno</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%23F3A53C'/><g fill='%232B1710' color='%232B1710' transform='translate(9 6) scale(.72)'><ellipse cx='32' cy='58' rx='27' ry='3.4' opacity='0'/><path d='M32 12c-9 0-15 8-15 18 0 8 4 14 8 17h14c4-3 8-9 8-17 0-10-6-18-15-18z'/><g transform='rotate(32 22 46)'><ellipse cx='22' cy='49' rx='5.2' ry='10'/><rect x='20.6' y='56' width='2.8' height='5' rx='1.2'/><circle cx='20.4' cy='62' r='2.3'/><circle cx='23.8' cy='62' r='2.3'/></g><g transform='rotate(-32 42 46)'><ellipse cx='42' cy='49' rx='5.2' ry='10'/><rect x='40.6' y='56' width='2.8' height='5' rx='1.2'/><circle cx='40.2' cy='62' r='2.3'/><circle cx='43.6' cy='62' r='2.3'/></g><g transform='rotate(18 15 28)'><ellipse cx='15' cy='29' rx='4.2' ry='9'/></g><g transform='rotate(-18 49 28)'><ellipse cx='49' cy='29' rx='4.2' ry='9'/></g><path d='M26 7c-2-2 2-3 0-5M32 7c-2-2 2-3 0-5M38 7c-2-2 2-3 0-5' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'/></g></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -94,6 +95,7 @@ button{font-family:inherit}
   width:52px; border:1px solid var(--border); border-radius:8px; padding:3px 6px; font:inherit; font-weight:700;
   color:var(--ink); background:var(--card);
 }
+
 
 /* ---- live region (visually hidden) ---- */
 .visually-hidden{
@@ -206,6 +208,47 @@ h2.title{font-size:1.5rem; font-weight:700}
 }
 .add-btn:hover, .add-btn:focus-visible{transform:scale(1.06); outline:3px solid #fff; outline-offset:2px}
 .dish-list .dish-info{flex:1; min-width:0}
+
+
+/* ---- Alpha 1 additions ---- */
+.dish-card{min-width:0}
+.price-row{gap:8px}
+.device[data-mode="desktop"] .dish-grid{grid-template-columns:repeat(auto-fill, minmax(220px, 1fr))}
+.device[data-mode="desktop"] #screen-inicio .desktop-grid{grid-template-columns:1fr; gap:6px}
+.device[data-mode="desktop"] #screen-inicio .desktop-grid > div:last-child .btn{width:auto; padding:12px 28px}
+
+/* splash: chicken silhouette on open */
+#splash{
+  position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  background:var(--bg); color:var(--ink); transition:opacity .45s ease, visibility .45s;
+}
+#splash.is-hidden{opacity:0; visibility:hidden; pointer-events:none}
+#splash svg{width:132px; height:132px; color:var(--amber); opacity:.9; animation:splash-pulse 1.6s ease-in-out infinite}
+#splash .splash-name{font-family:var(--font-display); font-size:1.9rem; font-weight:700}
+#splash .splash-sub{font-size:.88rem; color:var(--muted); margin-top:-8px}
+@keyframes splash-pulse{0%,100%{transform:scale(1)} 50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion: reduce){#splash svg{animation:none} #splash{transition:none}}
+
+/* payment method */
+.pay-options{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+.pay-opt{
+  flex:1 1 130px; border:1.5px solid var(--border); background:var(--card); color:var(--ink); border-radius:12px;
+  padding:10px 12px; font-weight:700; font-size:.85rem; cursor:pointer; text-align:center;
+}
+.pay-opt[aria-checked="true"]{border-color:var(--amber); background:var(--amber-bg)}
+.pay-saved{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; font-weight:600; flex-wrap:wrap}
+.pay-saved .acts{display:flex; gap:12px}
+.pay-form{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+.pay-form label{display:flex; flex-direction:column; gap:4px; font-size:.8rem; font-weight:700; color:var(--muted); min-width:0}
+.pay-form label.full{grid-column:1 / -1}
+.pay-form input, .pay-form select{
+  font:inherit; font-size:.95rem; color:var(--ink); background:var(--bg); border:1.5px solid var(--border);
+  border-radius:10px; padding:10px 12px; width:100%; box-sizing:border-box; min-width:0;
+}
+.pay-form input[aria-invalid="true"]{border-color:var(--tomato); background:var(--tomato-bg)}
+.pay-form .form-actions{grid-column:1 / -1; display:flex; gap:10px; flex-wrap:wrap}
+.pay-form .form-actions .btn{width:auto; padding:10px 20px; font-size:.95rem}
+
 
 /* buttons */
 .btn{
@@ -339,10 +382,16 @@ h2.title{font-size:1.5rem; font-weight:700}
 <div class="bg-layer" aria-hidden="true"></div>
 <div aria-live="polite" class="visually-hidden" id="announcer"></div>
 
+<div id="splash" aria-hidden="true">
+  <svg viewBox="0 0 64 64" fill="currentColor"><ellipse cx="32" cy="58" rx="27" ry="3.4" opacity=".5"/><path d="M32 12c-9 0-15 8-15 18 0 8 4 14 8 17h14c4-3 8-9 8-17 0-10-6-18-15-18z"/><g transform="rotate(32 22 46)"><ellipse cx="22" cy="49" rx="5.2" ry="10"/><rect x="20.6" y="56" width="2.8" height="5" rx="1.2"/><circle cx="20.4" cy="62" r="2.3"/><circle cx="23.8" cy="62" r="2.3"/></g><g transform="rotate(-32 42 46)"><ellipse cx="42" cy="49" rx="5.2" ry="10"/><rect x="40.6" y="56" width="2.8" height="5" rx="1.2"/><circle cx="40.2" cy="62" r="2.3"/><circle cx="43.6" cy="62" r="2.3"/></g><g transform="rotate(18 15 28)"><ellipse cx="15" cy="29" rx="4.2" ry="9"/></g><g transform="rotate(-18 49 28)"><ellipse cx="49" cy="29" rx="4.2" ry="9"/></g><path d="M26 7c-2-2 2-3 0-5M32 7c-2-2 2-3 0-5M38 7c-2-2 2-3 0-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  <div class="splash-name">NutriTurno</div>
+  <div class="splash-sub" data-i18n="tagline">Pide tu almuerzo sin hacer fila · Cafetería Piso 1</div>
+</div>
+
 <div class="toolbar">
   <div>
-    <h1>NutriTurno — Prototipo interactivo</h1>
-    <p>Actividad 6 · Flujo prioritario: ver menú → pedir → pagar → seguir el estado</p>
+    <h1>NutriTurno <span style="font-size:.7rem; font-weight:700; color:var(--amber-d); border:1.5px solid var(--border); border-radius:999px; padding:2px 8px; vertical-align:middle">Alpha 1</span></h1>
+    <p data-i18n="tagline">Pide tu almuerzo sin hacer fila · Cafetería Piso 1</p>
   </div>
   <div class="toolbar-group">
     <div class="seg" role="group" aria-label="Tamaño de pantalla">
@@ -358,14 +407,6 @@ h2.title{font-size:1.5rem; font-weight:700}
       <button id="btn-lang-es" aria-pressed="true" onclick="setLang('es')">ES</button>
       <button id="btn-lang-en" aria-pressed="false" onclick="setLang('en')">EN</button>
     </div>
-    <button class="demo-link" id="btn-simerr" aria-pressed="false" onclick="toggleSimError()" data-i18n="simerr">Simular error de pago (demo)</button>
-    <label class="demo-time" for="demo-prep-seconds">⏱️ <span data-i18n="prep_label_short">Tiempo prep.</span>
-      <input type="number" id="demo-prep-seconds" min="0" max="180" step="1" value="25" oninput="onPrepSecondsInput()"> <span data-i18n="seg">seg</span>
-    </label>
-    <label class="demo-time" for="demo-queue">👥 <span data-i18n="queue_label_short">Fila</span>
-      <input type="number" id="demo-queue" min="0" max="50" step="1" value="3" oninput="onQueueInput()">
-    </label>
-    <button class="demo-link" id="btn-acelerar" onclick="acelerarPedido()" data-i18n="accelerate">⏩ Adelantar a "Listo" (demo)</button>
   </div>
 </div>
 
@@ -466,13 +507,42 @@ h2.title{font-size:1.5rem; font-weight:700}
               </div>
               <div class="banner banner-info">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>
-                <span data-i18n="pickup_info">Recoger en Cafetería Piso 1 · listo en 15-20 min</span>
+                <span id="pickup-info"></span>
               </div>
             </div>
             <div>
-              <div class="card">
+              <div class="card" id="pay-card">
                 <strong data-i18n="payment_method">Método de pago</strong>
-                <div class="row" style="margin-top:10px"><span data-i18n="card">Tarjeta •••• 4821</span><button class="btn-ghost" style="padding:0" data-i18n="change" onclick="toast(T('change_unavailable')); announce(T('change_unavailable'))">Cambiar</button></div>
+                <div class="pay-options" role="radiogroup" aria-label="Método de pago" data-i18n-aria="payment_method">
+                  <button type="button" class="pay-opt" role="radio" id="pay-opt-card" aria-checked="true" onclick="setPayMethod('card')" data-i18n="pay_card">Tarjeta crédito / débito</button>
+                  <button type="button" class="pay-opt" role="radio" id="pay-opt-cash" aria-checked="false" onclick="setPayMethod('cash')" data-i18n="pay_cash">Efectivo al recoger</button>
+                </div>
+                <div class="pay-saved" id="pay-saved" hidden>
+                  <span id="pay-saved-text"></span>
+                  <span class="acts">
+                    <button type="button" class="btn-ghost" style="padding:0" onclick="editCard()" data-i18n="change">Cambiar</button>
+                    <button type="button" class="btn-ghost" style="padding:0" onclick="removeCard()" data-i18n="remove_card">Quitar</button>
+                  </span>
+                </div>
+                <form class="pay-form" id="pay-form" novalidate onsubmit="saveCard(event)" autocomplete="on">
+                  <label class="full"><span data-i18n="card_type">Tipo de tarjeta</span>
+                    <select id="card-type"><option value="credito" data-i18n="credit">Crédito</option><option value="debito" data-i18n="debit">Débito</option></select></label>
+                  <label class="full"><span data-i18n="card_number">Número de tarjeta</span>
+                    <input id="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="23" oninput="onCardNumberInput(this)"></label>
+                  <label class="full"><span data-i18n="card_holder">Nombre en la tarjeta</span>
+                    <input id="card-holder" autocomplete="cc-name" placeholder="CARLOS PÉREZ"></label>
+                  <label><span data-i18n="card_exp">Vence (MM/AA)</span>
+                    <input id="card-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" oninput="onExpInput(this)"></label>
+                  <label><span data-i18n="card_cvv">CVV</span>
+                    <input id="card-cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"></label>
+                  <p class="field-note field-error" id="card-error" role="alert" hidden style="grid-column:1 / -1; margin:0"></p>
+                  <p class="field-note" style="grid-column:1 / -1; margin:0" data-i18n="card_privacy">Guardamos solo el tipo, los últimos 4 dígitos y el vencimiento en este dispositivo. Nunca el número completo ni el CVV.</p>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-secondary" data-i18n="save_card">Guardar tarjeta</button>
+                    <button type="button" class="btn-ghost" id="card-cancel" onclick="cancelCardForm()" data-i18n="cancel">Cancelar</button>
+                  </div>
+                </form>
+                <p class="field-note" id="pay-cash-note" hidden data-i18n="cash_note">Pagarás en caja al recoger tu pedido en la Cafetería Piso 1.</p>
               </div>
               <div class="banner banner-error" id="confirmar-error" hidden role="alert">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
@@ -535,6 +605,13 @@ h2.title{font-size:1.5rem; font-weight:700}
               <label data-i18n="label_apellido">Apellido<input type="text" id="cuenta-apellido"></label>
             </div>
             <button class="btn btn-secondary" style="margin-top:12px; width:auto; padding:10px 18px" onclick="guardarCuenta()" data-i18n="cuenta_save">Guardar</button>
+          </div>
+          <div class="card">
+            <strong data-i18n="payment_method">Método de pago</strong>
+            <div class="pay-saved" id="cuenta-pay" style="margin-top:10px">
+              <span id="cuenta-pay-text"></span>
+              <span class="acts"><button type="button" class="btn-ghost" style="padding:0" id="cuenta-pay-btn" onclick="cuentaCard()"></button></span>
+            </div>
           </div>
           <div class="card">
             <strong data-i18n="cuenta_fav">★ Favoritos</strong>
@@ -643,6 +720,20 @@ const STR = {
     data_note:'Con esto te saludamos y así te avisamos cuando tu pedido esté listo.',
     your_order:'Tu pedido', empty_cart:'Tu pedido está vacío.', total:'Total',
     pickup_info:'Recoger en Cafetería Piso 1 · listo en 15-20 min',
+    tagline:'Pide tu almuerzo sin hacer fila · Cafetería Piso 1',
+    pickup_est: m => `Recoger en Cafetería Piso 1 · listo en ~${m} min según tu pedido`,
+    pay_card:'Tarjeta crédito / débito', pay_cash:'Efectivo al recoger', credit:'Crédito', debit:'Débito',
+    card_type:'Tipo de tarjeta', card_number:'Número de tarjeta', card_holder:'Nombre en la tarjeta', card_exp:'Vence (MM/AA)', card_cvv:'CVV',
+    card_privacy:'Guardamos solo el tipo, los últimos 4 dígitos y el vencimiento en este dispositivo. Nunca el número completo ni el CVV.',
+    save_card:'Guardar tarjeta', cancel:'Cancelar', remove_card:'Quitar', add_card:'Agregar tarjeta', no_card:'Sin tarjeta guardada',
+    cash_note:'Pagarás en caja al recoger tu pedido en la Cafetería Piso 1.',
+    card_saved:'Tarjeta guardada', card_removed:'Tarjeta quitada',
+    err_number:'El número de tarjeta debe tener entre 13 y 19 dígitos.', err_holder:'Escribe el nombre como aparece en la tarjeta.',
+    err_exp:'Revisa el vencimiento: usa MM/AA y una fecha que no haya pasado.', err_cvv:'El CVV debe tener 3 dígitos (4 en American Express).',
+    need_method:'Agrega una tarjeta o elige pagar en efectivo para continuar.',
+    pay_with: (b,t,l4) => `${b} ${t} •••• ${l4}`, pay_cash_label:'Efectivo al recoger', pay_row:'Pago',
+    confirming:'Confirmando pedido…', confirming_announce:'Confirmando tu pedido, un momento.',
+    eta_title: m => `(${m}) NutriTurno`,
     payment_method:'Método de pago', card:'Tarjeta •••• 4821', change:'Cambiar',
     name_error:'Escribe tu nombre y apellido para poder avisarte cuando tu pedido esté listo.',
     change_unavailable:'Cambiar método de pago no está disponible en este prototipo.',
@@ -673,7 +764,7 @@ const STR = {
     ready_sub: name => `${name}, recógelo en Cafetería Piso 1. Suena hasta que confirmes aquí abajo.`,
     ready_announce: name => `¡Tu pedido está listo para comer, ${name}!`,
     ready_ok:'OK, ¡gracias!', notif_confirmed:'Notificación confirmada.',
-    cuenta_title:'Tu cuenta', cuenta_sub:'Datos guardados en este dispositivo (cuenta local de demo)',
+    cuenta_title:'Tu cuenta', cuenta_sub:'Datos guardados solo en este dispositivo',
     cuenta_datos:'Tus datos', cuenta_save:'Guardar',
     cuenta_fav:'★ Favoritos', cuenta_fav_empty:'Toca la estrella de un plato en el menú para guardarlo aquí.',
     cuenta_hist:'Historial de pedidos', cuenta_hist_empty:'Todavía no has hecho ningún pedido.',
@@ -709,6 +800,20 @@ const STR = {
     data_note:"We'll use this to greet you and to let you know when your order is ready.",
     your_order:'Your order', empty_cart:'Your order is empty.', total:'Total',
     pickup_info:'Pick up at Floor 1 Cafeteria · ready in 15-20 min',
+    tagline:'Order your lunch without queuing · Floor 1 Cafeteria',
+    pickup_est: m => `Pick up at Floor 1 Cafeteria · ready in ~${m} min depending on your order`,
+    pay_card:'Credit / debit card', pay_cash:'Cash at pickup', credit:'Credit', debit:'Debit',
+    card_type:'Card type', card_number:'Card number', card_holder:'Name on card', card_exp:'Expires (MM/YY)', card_cvv:'CVV',
+    card_privacy:'We only keep the type, last 4 digits and expiry on this device. Never the full number or the CVV.',
+    save_card:'Save card', cancel:'Cancel', remove_card:'Remove', add_card:'Add card', no_card:'No saved card',
+    cash_note:'You will pay at the counter when you pick up your order at the Floor 1 Cafeteria.',
+    card_saved:'Card saved', card_removed:'Card removed',
+    err_number:'The card number must have 13 to 19 digits.', err_holder:'Enter the name as it appears on the card.',
+    err_exp:'Check the expiry: use MM/YY and a date that has not passed.', err_cvv:'The CVV must have 3 digits (4 for American Express).',
+    need_method:'Add a card or choose cash to continue.',
+    pay_with: (b,t,l4) => `${b} ${t} •••• ${l4}`, pay_cash_label:'Cash at pickup', pay_row:'Payment',
+    confirming:'Confirming order…', confirming_announce:'Confirming your order, one moment.',
+    eta_title: m => `(${m}) NutriTurno`,
     payment_method:'Payment method', card:'Card •••• 4821', change:'Change',
     name_error:'Enter your first and last name so we can let you know when your order is ready.',
     change_unavailable:'Changing the payment method is not available in this prototype.',
@@ -739,7 +844,7 @@ const STR = {
     ready_sub: name => `${name}, pick it up at Floor 1 Cafeteria. It will keep ringing until you confirm below.`,
     ready_announce: name => `Your order is ready to eat, ${name}!`,
     ready_ok:'OK, thanks!', notif_confirmed:'Notification confirmed.',
-    cuenta_title:'Your account', cuenta_sub:'Data saved on this device (local demo account)',
+    cuenta_title:'Your account', cuenta_sub:'Data saved only on this device',
     cuenta_datos:'Your details', cuenta_save:'Save',
     cuenta_fav:'★ Favorites', cuenta_fav_empty:'Tap the star on a dish in the menu to save it here.',
     cuenta_hist:'Order history', cuenta_hist_empty:"You haven't placed any orders yet.",
@@ -767,7 +872,7 @@ function applyI18n(){
 function setLang(l){
   lang = l; safeSet('nutriturno_lang', l);
   applyI18n();
-  renderChips(); renderInicioPreview(); renderMenuFull(); renderCuenta();
+  renderChips(); renderInicioPreview(); renderMenuFull(); renderCuenta(); renderPayment();
   if (document.getElementById('screen-confirmar').classList.contains('is-active')) renderConfirmar();
   if (document.getElementById('screen-estado').classList.contains('is-active')) renderEstado();
   document.getElementById('inicio-greeting').textContent = T('greeting') + ' ' + profile.nombre;
@@ -796,10 +901,11 @@ function loadProfile(){
         apellido: p.apellido || 'Pérez',
         favoritos: Array.isArray(p.favoritos) ? p.favoritos : [],
         historial: Array.isArray(p.historial) ? p.historial : [],
+        card: (p.card && p.card.last4) ? p.card : null,
       };
     }
   } catch(e){}
-  return { nombre:'Carlos', apellido:'Pérez', favoritos:[], historial:[] };
+  return { nombre:'Carlos', apellido:'Pérez', favoritos:[], historial:[], card:null };
 }
 function saveProfile(){ safeSet('nutriturno_profile', JSON.stringify(profile)); }
 let profile = loadProfile();
@@ -824,7 +930,6 @@ let activeFilter = 'todos';
 let cart = {};        // id -> qty
 let cartNotes = {};   // id -> note text
 let order = null;     // {id, items, total, stage, totalSeconds, remaining, customerName, queueAhead}
-let simError = false;
 
 function fmt(n){ return '$' + n.toLocaleString('es-CO'); }
 function announce(msg){ document.getElementById('announcer').textContent = msg; }
@@ -948,6 +1053,8 @@ function renderConfirmar(){
   const total = cartTotal();
   document.getElementById('cart-total').textContent = fmt(total);
   document.getElementById('btn-pagar-amount').textContent = fmt(total);
+  document.getElementById('pickup-info').textContent = T('pickup_est', Math.max(1, Math.round(prepSecondsFor(entries)/60)));
+  renderPayment();
   const btn = document.getElementById('btn-pagar');
   const err = document.getElementById('confirmar-error');
   if (entries.length === 0){
@@ -958,12 +1065,6 @@ function renderConfirmar(){
     btn.disabled = false; btn.removeAttribute('aria-disabled');
     err.hidden = true;
   }
-}
-
-function toggleSimError(){
-  simError = !simError;
-  document.getElementById('btn-simerr').setAttribute('aria-pressed', String(simError));
-  announce(simError ? T('sim_on') : T('sim_off'));
 }
 
 /* ---- sound: synthesized beep (no external audio file, so it works fully offline) ---- */
@@ -1009,34 +1110,61 @@ function openReadyModal(){
   document.getElementById('btn-ready-ok').focus();
   startReadyLoop();
   announce(T('ready_announce', order ? order.customerName : customerName));
+  try { if (navigator.vibrate) navigator.vibrate([300,150,300]); } catch(e){}
+  try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('NutriTurno', { body: T('ready_title') }); } catch(e){}
 }
 function closeReadyModal(){
+  document.title = 'NutriTurno';
   document.getElementById('ready-modal').hidden = true;
   stopReadyLoop();
   announce(T('notif_confirmed'));
 }
 
-/* ---- prep-time countdown + live-editable demo controls (time & queue) ---- */
+/* ---- preparation time: estimated from the order, counted in real time (survives reloads) ---- */
 let orderTimerHandle = null;
+const DEMO_FAST = (location.hash || '').toLowerCase() === '#demo';   // hidden presentation shortcut: no UI, 25 s estimate
+function prepSecondsFor(entries){
+  if (DEMO_FAST) return 25;
+  const units = entries.reduce((s,e)=>s+e.qty, 0);
+  return Math.max(600, Math.min(1500, 480 + 120*units));          // 10–25 min, grows with the number of dishes
+}
 function fmtTime(s){
   s = Math.max(0, Math.round(s));
   const m = Math.floor(s/60), r = s%60;
   return m + ':' + String(r).padStart(2,'0');
 }
+function saveOrder(){
+  if (order) safeSet('nutriturno_order', JSON.stringify(order)); else { try { localStorage.removeItem('nutriturno_order'); } catch(e){} }
+}
+function restoreOrder(){
+  try {
+    const raw = safeGet('nutriturno_order'); if (!raw) return;
+    const o = JSON.parse(raw);
+    if (!o || !o.id || !o.endsAt || !Array.isArray(o.items)) return;
+    order = o;
+    order.remaining = Math.max(0, Math.ceil((order.endsAt - Date.now())/1000));
+    updateStageFromRemaining();
+    if (order.remaining > 0) startOrderTimer();
+  } catch(e){ order = null; }
+}
 function startOrderTimer(){
   clearInterval(orderTimerHandle);
-  orderTimerHandle = setInterval(() => {
+  const tick = () => {
     if (!order) { clearInterval(orderTimerHandle); return; }
-    order.remaining = Math.max(0, order.remaining - 1);
+    order.remaining = Math.max(0, Math.ceil((order.endsAt - Date.now())/1000));
     updateStageFromRemaining();
+    order.queueAhead = order.remaining > 0 ? Math.round(order.queueInitial * order.remaining / order.totalSeconds) : 0;
+    document.title = order.remaining > 0 ? T('eta_title', fmtTime(order.remaining)) : 'NutriTurno';
     renderEstado();
     if (order.remaining <= 0){
       clearInterval(orderTimerHandle);
       orderTimerHandle = null;
-      if (order.stage < 2){ order.stage = 2; renderEstado(); }
+      order.stage = 2; renderEstado();
       openReadyModal();
     }
-  }, 1000);
+  };
+  orderTimerHandle = setInterval(tick, 1000);
+  tick();
 }
 function updateStageFromRemaining(){
   if (!order) return;
@@ -1045,34 +1173,86 @@ function updateStageFromRemaining(){
   else if (frac >= 1/3) order.stage = 1;
   else order.stage = 0;
 }
-function acelerarPedido(){
-  if (!order || order.stage === 2){ toast(T('no_active_order')); return; }
-  unlockAudio();
-  order.remaining = Math.min(order.remaining, 2);
-  announce(T('accelerating'));
+
+/* ---- payment method (card details never leave this device; only brand/type/last4/expiry are kept) ---- */
+let payMethod = 'card';
+function cardBrand(num){
+  if (/^4/.test(num)) return 'Visa';
+  if (/^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(num)) return 'Mastercard';
+  if (/^3[47]/.test(num)) return 'American Express';
+  if (/^(36|38|30[0-5])/.test(num)) return 'Diners';
+  if (/^(6011|65)/.test(num)) return 'Discover';
+  return lang==='en' ? 'Card' : 'Tarjeta';
 }
-// Live demo controls: while an order is being prepared, changing these two fields
-// updates the customer's screen immediately — same as a kitchen display would.
-function onPrepSecondsInput(){
-  if (!order || order.stage === 2) return;
-  const v = Math.max(0, Math.min(180, Number(document.getElementById('demo-prep-seconds').value) || 0));
-  order.remaining = v;
-  order.totalSeconds = Math.max(order.totalSeconds, v, 1);
-  updateStageFromRemaining();
-  renderEstado();
-  announce(T('time_updated'));
-  if (order.remaining <= 0){
-    clearInterval(orderTimerHandle); orderTimerHandle = null;
-    order.stage = 2; renderEstado(); openReadyModal();
-  } else if (!orderTimerHandle){
-    startOrderTimer();
-  }
+function onCardNumberInput(el){
+  const d = el.value.replace(/\D/g,'').slice(0,19);
+  const amex = /^3[47]/.test(d);
+  let out = '';
+  if (amex){ out = [d.slice(0,4), d.slice(4,10), d.slice(10,15)].filter(Boolean).join(' '); }
+  else { out = d.replace(/(.{4})/g,'$1 ').trim(); }
+  el.value = out;
+  clearCardError();
 }
-function onQueueInput(){
-  if (!order || order.stage === 2) return;
-  order.queueAhead = Math.max(0, Math.min(50, Number(document.getElementById('demo-queue').value) || 0));
-  renderEstado();
-  announce(T('queue_updated'));
+function onExpInput(el){
+  let d = el.value.replace(/\D/g,'').slice(0,4);
+  if (d.length >= 3) d = d.slice(0,2) + '/' + d.slice(2);
+  el.value = d; clearCardError();
+}
+function clearCardError(){
+  const e = document.getElementById('card-error'); if (e) e.hidden = true;
+  ['card-number','card-holder','card-exp','card-cvv'].forEach(id => document.getElementById(id).removeAttribute('aria-invalid'));
+}
+function cardFail(id, key){
+  const e = document.getElementById('card-error');
+  e.textContent = T(key); e.hidden = false;
+  const el = document.getElementById(id); el.setAttribute('aria-invalid','true'); el.focus();
+  announce(T(key));
+  return false;
+}
+function saveCard(ev){
+  if (ev) ev.preventDefault();
+  const num = document.getElementById('card-number').value.replace(/\D/g,'');
+  const holder = document.getElementById('card-holder').value.trim();
+  const exp = document.getElementById('card-exp').value;
+  const cvv = document.getElementById('card-cvv').value;
+  clearCardError();
+  if (num.length < 13 || num.length > 19) return cardFail('card-number','err_number');
+  if (holder.length < 3 || !/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(holder)) return cardFail('card-holder','err_holder');
+  const m = /^(\d{2})\/(\d{2})$/.exec(exp);
+  const now = new Date(), yy = now.getFullYear() % 100, mm = now.getMonth() + 1;
+  if (!m || +m[1] < 1 || +m[1] > 12 || +m[2] < yy || (+m[2] === yy && +m[1] < mm)) return cardFail('card-exp','err_exp');
+  const need = /^3[47]/.test(num) ? 4 : 3;
+  if (cvv.length !== need) return cardFail('card-cvv','err_cvv');
+  profile.card = { brand: cardBrand(num), type: document.getElementById('card-type').value, last4: num.slice(-4), exp, holder };
+  saveProfile();
+  ['card-number','card-holder','card-exp','card-cvv'].forEach(id => document.getElementById(id).value = '');   // never keep number/CVV in the page
+  cardFormOpen = false;
+  renderPayment(); renderCuenta();
+  toast(T('card_saved')); announce(T('card_saved'));
+  return false;
+}
+let cardFormOpen = false;
+function editCard(){ cardFormOpen = true; renderPayment(); document.getElementById('card-number').focus(); }
+function cancelCardForm(){ cardFormOpen = false; clearCardError(); renderPayment(); }
+function removeCard(){ profile.card = null; saveProfile(); cardFormOpen = false; renderPayment(); renderCuenta(); toast(T('card_removed')); announce(T('card_removed')); }
+function cuentaCard(){
+  if (profile.card) removeCard();
+  else { payMethod = 'card'; cardFormOpen = true; goTab('menu'); showScreen('confirmar'); renderPayment(); }
+}
+function setPayMethod(m){ payMethod = m; renderPayment(); }
+function cardLabel(c){ return T('pay_with', c.brand, c.type === 'debito' ? T('debit') : T('credit'), c.last4); }
+function renderPayment(){
+  const hasCard = !!profile.card;
+  const showForm = payMethod === 'card' && (!hasCard || cardFormOpen);
+  document.getElementById('pay-opt-card').setAttribute('aria-checked', String(payMethod==='card'));
+  document.getElementById('pay-opt-cash').setAttribute('aria-checked', String(payMethod==='cash'));
+  document.getElementById('pay-saved').hidden = !(payMethod==='card' && hasCard && !cardFormOpen);
+  if (hasCard) document.getElementById('pay-saved-text').textContent = cardLabel(profile.card);
+  document.getElementById('pay-form').style.display = showForm ? '' : 'none';
+  document.getElementById('card-cancel').hidden = !hasCard;
+  document.getElementById('pay-cash-note').hidden = payMethod !== 'cash';
+  const pe = document.getElementById('confirmar-error');
+  if (!pe.hidden && document.getElementById('confirmar-error-text').textContent === T('need_method') && (payMethod==='cash' || hasCard)) pe.hidden = true;
 }
 
 function clearNameError(){
@@ -1098,29 +1278,34 @@ function pagar(){
     return;
   }
   clearNameError();
+  if (payMethod === 'card' && !profile.card){
+    const err = document.getElementById('confirmar-error');
+    err.hidden = false;
+    document.getElementById('confirmar-error-text').textContent = T('need_method');
+    announce(T('need_method'));
+    cardFormOpen = true; renderPayment();
+    document.getElementById('card-number').focus();
+    return;
+  }
+  document.getElementById('confirmar-error').hidden = true;
+  const payLabel = payMethod === 'cash' ? T('pay_cash_label') : cardLabel(profile.card);
   customerName = [nombre, apellido].filter(Boolean).join(' ') || T('your_data');
   document.getElementById('inicio-greeting').textContent = T('greeting') + ' ' + (nombre || profile.nombre);
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch(e){}
   const btn = document.getElementById('btn-pagar');
   const label = document.getElementById('btn-pagar-label');
   btn.disabled = true;
   const prevHTML = label.innerHTML;
-  label.innerHTML = `<span class="spinner" aria-hidden="true"></span> ${T('processing')}`;
-  announce(T('processing_announce'));
+  label.innerHTML = `<span class="spinner" aria-hidden="true"></span> ${T('confirming')}`;
+  announce(T('confirming_announce'));
   setTimeout(() => {
-    if (simError){
-      label.innerHTML = prevHTML;
-      btn.disabled = false;
-      const err = document.getElementById('confirmar-error');
-      err.hidden = false;
-      document.getElementById('confirmar-error-text').textContent = T('pay_error');
-      announce(T('pay_error_announce'));
-      return;
-    }
-    const totalSeconds = Math.max(5, Math.min(180, Number(document.getElementById('demo-prep-seconds').value) || 25));
-    const queueAhead = Math.max(0, Math.min(50, Number(document.getElementById('demo-queue').value) || 0));
+    const totalSeconds = prepSecondsFor(entries);
+    const queueInitial = DEMO_FAST ? 2 : 1 + Math.floor(Math.random()*3);   // 1–3 orders ahead, drops as time passes
     const orderTotal = entries.reduce((s,e)=>s+e.price*e.qty, 0);
     const orderId = String(1000 + Math.floor(Math.random()*9000));
-    order = { id: orderId, items: entries, total: orderTotal, stage: 0, totalSeconds, remaining: totalSeconds, customerName, queueAhead };
+    order = { id: orderId, items: entries, total: orderTotal, stage: 0, totalSeconds, remaining: totalSeconds,
+              endsAt: Date.now() + totalSeconds*1000, customerName, queueInitial, queueAhead: queueInitial, payLabel };
+    saveOrder();
     cart = {}; cartNotes = {};
     profile.nombre = nombre || profile.nombre;
     profile.apellido = apellido || profile.apellido;
@@ -1137,10 +1322,9 @@ function pagar(){
     btn.disabled = false;
     goTab('pedidos');
     showScreen('estado');
-    renderEstado();
     startOrderTimer();
     announce(T('order_confirmed'));
-  }, 1300);
+  }, 900);
 }
 
 function renderEstado(){
@@ -1177,10 +1361,10 @@ function renderEstado(){
   document.getElementById('estado-cart-rows').innerHTML = order.items.map(e => {
     const noteHtml = e.note ? ` <span style="color:var(--muted); font-size:.78rem">(${escapeHtml(e.note)})</span>` : '';
     return `<div class="row"><span>${e.qty}x&nbsp; ${dishName(e)}${noteHtml}</span><span>${fmt(e.price*e.qty)}</span></div>`;
-  }).join('') + `<div class="row total"><span>${T('total')}</span><span>${fmt(order.total)}</span></div>`;
+  }).join('') + `<div class="row total"><span>${T('total')}</span><span>${fmt(order.total)}</span></div>` + (order.payLabel ? `<div class="row" style="margin-top:6px; color:var(--muted); font-size:.85rem"><span>${T('pay_row')}</span><span>${escapeHtml(order.payLabel)}</span></div>` : '');
 }
 function cancelarPedido(){
-  order = null;
+  order = null; saveOrder(); document.title = 'NutriTurno';
   clearInterval(orderTimerHandle);
   orderTimerHandle = null;
   closeReadyModal();
@@ -1191,6 +1375,8 @@ function cancelarPedido(){
 
 /* ---- Cuenta (local demo account): name, favorites, order history ---- */
 function renderCuenta(){
+  const cp = document.getElementById('cuenta-pay-text');
+  if (cp){ cp.textContent = profile.card ? cardLabel(profile.card) : T('no_card'); document.getElementById('cuenta-pay-btn').textContent = profile.card ? T('remove_card') : T('add_card'); }
   const nEl = document.getElementById('cuenta-nombre'), aEl = document.getElementById('cuenta-apellido');
   if (nEl) nEl.value = profile.nombre;
   if (aEl) aEl.value = profile.apellido;
@@ -1277,6 +1463,10 @@ function setDevice(mode){
 applyTheme();
 applyI18n();
 renderChips();
+restoreOrder();
+renderPayment();
+if (window.innerWidth >= 900) setDevice('desktop');
+(function(){ const s = document.getElementById('splash'); const hide = () => { s.classList.add('is-hidden'); setTimeout(() => s.remove(), 600); }; setTimeout(hide, 1500); s.addEventListener('click', hide); })();
 renderInicioPreview();
 renderMenuFull();
 renderEstado();

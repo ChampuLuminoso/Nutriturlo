@@ -234,6 +234,8 @@ h2.title{font-size:1.5rem; font-weight:700}
 .row{display:flex; justify-content:space-between; font-size:.9rem; padding:6px 0}
 .row.total{font-weight:800; border-top:1px solid var(--border); margin-top:6px; padding-top:12px; font-size:1rem}
 .field-note{font-size:.78rem; color:var(--muted); margin-top:10px}
+.field-error{color:var(--tomato); font-weight:700}
+.name-fields input[aria-invalid="true"]{border-color:var(--tomato); background:var(--tomato-bg)}
 
 .sr-announce{font-size:.78rem; color:var(--muted)}
 
@@ -263,9 +265,10 @@ h2.title{font-size:1.5rem; font-weight:700}
 .checkbox-row{display:flex; align-items:center; gap:8px; font-size:.82rem; color:var(--muted); margin-top:10px}
 
 /* name fields */
-.name-fields{display:flex; gap:10px; margin-top:10px}
-.name-fields label{flex:1; display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:700; color:var(--muted)}
+.name-fields{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+.name-fields label{flex:1 1 120px; min-width:0; display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:700; color:var(--muted)}
 .name-fields input{
+  width:100%; box-sizing:border-box; min-width:0;
   font:inherit; font-size:.95rem; font-weight:600; color:var(--ink); background:var(--card);
   border:1.5px solid var(--border); border-radius:10px; padding:10px 12px;
 }
@@ -450,9 +453,10 @@ h2.title{font-size:1.5rem; font-weight:700}
               <div class="card">
                 <strong data-i18n="your_data">Tus datos</strong>
                 <div class="name-fields">
-                  <label data-i18n="label_nombre">Nombre<input type="text" id="input-nombre" value="Carlos" autocomplete="given-name"></label>
-                  <label data-i18n="label_apellido">Apellido<input type="text" id="input-apellido" value="Pérez" autocomplete="family-name"></label>
+                  <label data-i18n="label_nombre">Nombre<input type="text" id="input-nombre" value="Carlos" autocomplete="given-name" oninput="clearNameError()"></label>
+                  <label data-i18n="label_apellido">Apellido<input type="text" id="input-apellido" value="Pérez" autocomplete="family-name" oninput="clearNameError()"></label>
                 </div>
+                <p class="field-note field-error" id="name-error" role="alert" hidden data-i18n="name_error">Escribe tu nombre y apellido para poder avisarte cuando tu pedido esté listo.</p>
                 <p class="field-note" data-i18n="data_note">Con esto te saludamos y así te avisamos cuando tu pedido esté listo.</p>
               </div>
               <div class="card">
@@ -468,7 +472,7 @@ h2.title{font-size:1.5rem; font-weight:700}
             <div>
               <div class="card">
                 <strong data-i18n="payment_method">Método de pago</strong>
-                <div class="row" style="margin-top:10px"><span data-i18n="card">Tarjeta •••• 4821</span><button class="btn-ghost" style="padding:0" data-i18n="change">Cambiar</button></div>
+                <div class="row" style="margin-top:10px"><span data-i18n="card">Tarjeta •••• 4821</span><button class="btn-ghost" style="padding:0" data-i18n="change" onclick="toast(T('change_unavailable')); announce(T('change_unavailable'))">Cambiar</button></div>
               </div>
               <div class="banner banner-error" id="confirmar-error" hidden role="alert">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
@@ -640,6 +644,8 @@ const STR = {
     your_order:'Tu pedido', empty_cart:'Tu pedido está vacío.', total:'Total',
     pickup_info:'Recoger en Cafetería Piso 1 · listo en 15-20 min',
     payment_method:'Método de pago', card:'Tarjeta •••• 4821', change:'Cambiar',
+    name_error:'Escribe tu nombre y apellido para poder avisarte cuando tu pedido esté listo.',
+    change_unavailable:'Cambiar método de pago no está disponible en este prototipo.',
     need_dish:'Agrega al menos un plato antes de continuar.',
     pay:'Pagar', processing:'Procesando pago…', processing_announce:'Procesando el pago, un momento.',
     pay_error:'No pudimos procesar el pago. Verifica tu tarjeta e intenta de nuevo.',
@@ -704,6 +710,8 @@ const STR = {
     your_order:'Your order', empty_cart:'Your order is empty.', total:'Total',
     pickup_info:'Pick up at Floor 1 Cafeteria · ready in 15-20 min',
     payment_method:'Payment method', card:'Card •••• 4821', change:'Change',
+    name_error:'Enter your first and last name so we can let you know when your order is ready.',
+    change_unavailable:'Changing the payment method is not available in this prototype.',
     need_dish:'Add at least one dish before continuing.',
     pay:'Pay', processing:'Processing payment…', processing_announce:'Processing your payment, one moment.',
     pay_error:'We could not process your payment. Check your card and try again.',
@@ -1067,12 +1075,29 @@ function onQueueInput(){
   announce(T('queue_updated'));
 }
 
+function clearNameError(){
+  document.getElementById('name-error').hidden = true;
+  document.getElementById('input-nombre').removeAttribute('aria-invalid');
+  document.getElementById('input-apellido').removeAttribute('aria-invalid');
+}
+
 function pagar(){
   const entries = cartEntries().map(e => ({...e, note:(cartNotes[e.id]||'').trim()}));
   if (entries.length === 0) return;
   unlockAudio();
   const nombre = (document.getElementById('input-nombre').value || '').trim();
   const apellido = (document.getElementById('input-apellido').value || '').trim();
+  const nombreEl = document.getElementById('input-nombre'), apellidoEl = document.getElementById('input-apellido');
+  const nameErr = document.getElementById('name-error');
+  if (!nombre || !apellido){
+    nameErr.hidden = false;
+    if (!nombre) nombreEl.setAttribute('aria-invalid','true'); else nombreEl.removeAttribute('aria-invalid');
+    if (!apellido) apellidoEl.setAttribute('aria-invalid','true'); else apellidoEl.removeAttribute('aria-invalid');
+    announce(T('name_error'));
+    (!nombre ? nombreEl : apellidoEl).focus();
+    return;
+  }
+  clearNameError();
   customerName = [nombre, apellido].filter(Boolean).join(' ') || T('your_data');
   document.getElementById('inicio-greeting').textContent = T('greeting') + ' ' + (nombre || profile.nombre);
   const btn = document.getElementById('btn-pagar');

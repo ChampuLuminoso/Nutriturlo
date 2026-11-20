@@ -376,6 +376,107 @@ h2.title{font-size:1.5rem; font-weight:700}
 .ready-modal-card p{color:var(--muted); font-size:.9rem; margin:0 0 18px}
 .ready-modal-card .btn{margin-top:4px}
 [hidden]{display:none !important}
+
+/* ---- Alpha 2: softer motion, bubble, sounds ---- */
+@media (prefers-reduced-motion: no-preference){
+  .screen.is-active{animation:screen-in .34s cubic-bezier(.22,.9,.3,1)}
+  @keyframes screen-in{from{opacity:0; transform:translateY(10px) scale(.992)} to{opacity:1; transform:none}}
+  .stagger .dish-card{animation:card-in .5s cubic-bezier(.22,.9,.3,1) both}
+  .stagger .dish-card:nth-child(2){animation-delay:.06s} .stagger .dish-card:nth-child(3){animation-delay:.12s}
+  .stagger .dish-card:nth-child(4){animation-delay:.18s} .stagger .dish-card:nth-child(5){animation-delay:.24s}
+  .stagger .dish-card:nth-child(n+6){animation-delay:.3s}
+  @keyframes card-in{from{opacity:0; transform:translateY(16px) scale(.97)} to{opacity:1; transform:none}}
+  .add-btn.pop{animation:add-pop .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes add-pop{0%{transform:scale(1)} 35%{transform:scale(1.35) rotate(-8deg)} 70%{transform:scale(.92)} 100%{transform:scale(1)}}
+  .fav-btn.pop{animation:add-pop .5s cubic-bezier(.2,1.6,.4,1)}
+  .dish-card .thumb img{transition:transform .5s cubic-bezier(.22,.9,.3,1)}
+  .dish-card:hover .thumb img{transform:scale(1.06)}
+  .lightbox-card{transform:scale(.86) translateY(14px); transition:transform .34s cubic-bezier(.2,1.35,.4,1)}
+  .lightbox.is-open .lightbox-card{transform:none}
+  .toast{transition:opacity .3s, transform .4s cubic-bezier(.2,1.4,.4,1)}
+  .dish-card{transition:transform .25s cubic-bezier(.22,.9,.3,1), box-shadow .25s}
+  .dish-card:hover{transform:translateY(-3px); box-shadow:0 14px 28px -16px rgba(43,23,16,.45)}
+  .chip, .btn, .pay-opt, .seg button, nav.tabbar button{transition:transform .15s, background-color .2s, border-color .2s, color .2s}
+  .btn:active, .chip:active, .pay-opt:active{transform:scale(.96)}
+  .remove-btn{transition:transform .15s} .remove-btn:hover{transform:rotate(90deg) scale(1.08)}
+  .ready-modal-icon{animation:ready-bounce 1.2s ease-in-out infinite}
+  @keyframes ready-bounce{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
+  .bubble-float{animation:bubble-float 3.4s ease-in-out infinite}
+  @keyframes bubble-float{0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-5px) rotate(2deg)}}
+  #bubble-wrap.bump #bubble{animation:bubble-bump .55s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes bubble-bump{0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)}}
+  #bubble-wrap.is-in{animation:bubble-in .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes bubble-in{from{opacity:0; transform:scale(.3)} to{opacity:1; transform:none}}
+  .bubble-panel{animation:panel-in .26s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes panel-in{from{opacity:0; transform:scale(.88) translateY(8px)} to{opacity:1; transform:none}}
+  .bubble.ready .bubble-face, #bubble.ready .bubble-face{animation:ready-bounce 1s ease-in-out infinite}
+}
+.dish-card .thumb:not(.is-loaded){
+  background:linear-gradient(100deg, var(--amber-bg) 30%, rgba(255,255,255,.5) 50%, var(--amber-bg) 70%); background-size:220% 100%;
+}
+@media (prefers-reduced-motion: no-preference){ .dish-card .thumb:not(.is-loaded){animation:shimmer 1.3s linear infinite} @keyframes shimmer{to{background-position:-220% 0}} }
+
+/* big order number */
+.order-code-card{
+  text-align:center; border:2px dashed var(--amber); background:var(--amber-bg); border-radius:18px; padding:14px 12px; margin-bottom:14px;
+}
+.order-code-card .oc-label{font-size:.78rem; font-weight:700; color:var(--amber-d); letter-spacing:.06em; text-transform:uppercase}
+.order-code-card .oc-num{font-family:var(--font-display); font-size:3rem; font-weight:700; line-height:1.05; color:var(--ink); margin:2px 0}
+.order-code-card .oc-hint{font-size:.82rem; color:var(--muted)}
+.order-num-big{font-family:var(--font-display); font-size:2.4rem; font-weight:700; margin:4px 0 0}
+
+/* empty states */
+.empty-mini{text-align:center; padding:6px 0 4px}
+.empty-mini svg{width:76px; height:76px; margin-bottom:4px}
+.empty-mini p{margin:0}
+
+/* history reorder */
+.hist-actions{display:flex; justify-content:space-between; align-items:center; margin-top:6px}
+.reorder-btn{
+  border:1.5px solid var(--amber); background:var(--amber-bg); color:var(--ink); border-radius:999px; padding:6px 14px;
+  font:inherit; font-size:.82rem; font-weight:700; cursor:pointer;
+}
+.reorder-btn:hover, .reorder-btn:focus-visible{background:var(--amber)}
+
+/* floating bubble (like the old chat heads) */
+#bubble-wrap{position:fixed; z-index:70; left:0; top:0; width:62px; height:62px; touch-action:none; user-select:none; -webkit-user-select:none}
+#bubble{
+  position:relative; width:62px; height:62px; border-radius:50%; border:none; padding:0; cursor:grab; touch-action:none;
+  background:radial-gradient(circle at 30% 24%, #FFE2B4, var(--amber) 52%, #D98511);
+  box-shadow:0 10px 24px -6px rgba(43,23,16,.55), inset 0 -4px 8px rgba(120,60,0,.25), inset 0 3px 6px rgba(255,255,255,.5);
+  color:#2B1710; display:block;
+}
+#bubble:active{cursor:grabbing}
+#bubble:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+.bubble-float{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; border-radius:50%}
+.bubble-ring{position:absolute; inset:-3px; width:68px; height:68px; transform:rotate(-90deg); pointer-events:none}
+.bubble-ring circle{fill:none; stroke-width:3.5; stroke-linecap:round}
+.bubble-ring .trk{stroke:rgba(43,23,16,.18)}
+.bubble-ring .fill{stroke:#2B1710; stroke-dasharray:175.9; stroke-dashoffset:175.9; transition:stroke-dashoffset .9s linear}
+.bubble-face{position:relative; font-weight:800; font-size:.82rem; display:flex; align-items:center; justify-content:center; pointer-events:none}
+.bubble-face svg{width:28px; height:28px}
+.bubble-badge{
+  position:absolute; top:-4px; right:-4px; min-width:22px; height:22px; border-radius:999px; background:var(--tomato); color:#fff;
+  font-size:.74rem; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 5px; border:2px solid var(--card);
+}
+#bubble.ready{background:radial-gradient(circle at 30% 24%, #D7F0C2, #6FB04A 55%, #3F7E26); color:#fff}
+.bubble-panel{
+  position:absolute; width:min(300px, calc(100vw - 24px)); background:var(--card); color:var(--ink); border:1px solid var(--border);
+  border-radius:20px; padding:14px 16px 16px; box-shadow:0 22px 44px -12px rgba(43,23,16,.5); z-index:2;
+}
+.bubble-panel[hidden]{display:none}
+.bp-sec + .bp-sec{margin-top:14px; padding-top:12px; border-top:1px dashed var(--border)}
+.bp-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.bp-chip{font-size:.72rem; font-weight:800; background:var(--amber-bg); color:var(--amber-d); border-radius:999px; padding:3px 10px}
+.bp-chip.ready{background:var(--sage-bg); color:var(--sage)}
+.bp-line{font-size:.85rem; color:var(--muted); margin:6px 0 0}
+.bp-row{display:flex; justify-content:space-between; gap:8px; font-size:.86rem; margin-top:4px}
+.bp-btns{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+.bp-btns .btn{width:auto; flex:1 1 110px; padding:10px 14px; font-size:.9rem}
+.bubble-panel .progress-track{margin:10px 0 0; max-width:none}
+
+/* sound picker */
+.seg .snd{font-size:1rem; padding:5px 10px}
 </style>
 
 <a class="skip-link" href="#app-main">Saltar al contenido principal</a>
@@ -406,6 +507,12 @@ h2.title{font-size:1.5rem; font-weight:700}
     <div class="seg" role="group" aria-label="Idioma / Language">
       <button id="btn-lang-es" aria-pressed="true" onclick="setLang('es')">ES</button>
       <button id="btn-lang-en" aria-pressed="false" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="seg" role="group" aria-label="Sonido" data-i18n-aria="sound_label" id="sound-seg">
+      <button class="snd" id="snd-pop" aria-pressed="true" onclick="setSound('pop')">🫧</button>
+      <button class="snd" id="snd-marimba" aria-pressed="false" onclick="setSound('marimba')">🎹</button>
+      <button class="snd" id="snd-candy" aria-pressed="false" onclick="setSound('candy')">🍬</button>
+      <button class="snd" id="snd-off" aria-pressed="false" onclick="setSound('off')">🔇</button>
     </div>
   </div>
 </div>
@@ -524,24 +631,7 @@ h2.title{font-size:1.5rem; font-weight:700}
                     <button type="button" class="btn-ghost" style="padding:0" onclick="removeCard()" data-i18n="remove_card">Quitar</button>
                   </span>
                 </div>
-                <form class="pay-form" id="pay-form" novalidate onsubmit="saveCard(event)" autocomplete="on">
-                  <label class="full"><span data-i18n="card_type">Tipo de tarjeta</span>
-                    <select id="card-type"><option value="credito" data-i18n="credit">Crédito</option><option value="debito" data-i18n="debit">Débito</option></select></label>
-                  <label class="full"><span data-i18n="card_number">Número de tarjeta</span>
-                    <input id="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="23" oninput="onCardNumberInput(this)"></label>
-                  <label class="full"><span data-i18n="card_holder">Nombre en la tarjeta</span>
-                    <input id="card-holder" autocomplete="cc-name" placeholder="CARLOS PÉREZ"></label>
-                  <label><span data-i18n="card_exp">Vence (MM/AA)</span>
-                    <input id="card-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" oninput="onExpInput(this)"></label>
-                  <label><span data-i18n="card_cvv">CVV</span>
-                    <input id="card-cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"></label>
-                  <p class="field-note field-error" id="card-error" role="alert" hidden style="grid-column:1 / -1; margin:0"></p>
-                  <p class="field-note" style="grid-column:1 / -1; margin:0" data-i18n="card_privacy">Guardamos solo el tipo, los últimos 4 dígitos y el vencimiento en este dispositivo. Nunca el número completo ni el CVV.</p>
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn-secondary" data-i18n="save_card">Guardar tarjeta</button>
-                    <button type="button" class="btn-ghost" id="card-cancel" onclick="cancelCardForm()" data-i18n="cancel">Cancelar</button>
-                  </div>
-                </form>
+                <div id="card-form-slot"></div>
                 <p class="field-note" id="pay-cash-note" hidden data-i18n="cash_note">Pagarás en caja al recoger tu pedido en la Cafetería Piso 1.</p>
               </div>
               <div class="banner banner-error" id="confirmar-error" hidden role="alert">
@@ -563,9 +653,7 @@ h2.title{font-size:1.5rem; font-weight:700}
 
           <div class="card" id="estado-vacio-card">
             <div class="empty-state">
-              <div class="thumb" style="margin:0 auto 14px" aria-hidden="true">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="1"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-              </div>
+              <div id="estado-empty-art"></div>
               <p style="font-weight:700" data-i18n="no_active">No tienes un pedido activo</p>
               <p class="field-note" data-i18n="go_see_menu">Ve al menú y arma tu pedido para verlo aquí.</p>
               <button class="btn btn-secondary" style="margin-top:14px; width:auto; padding:10px 20px" onclick="goTab('menu')" data-i18n="see_menu">Ver menú</button>
@@ -573,6 +661,11 @@ h2.title{font-size:1.5rem; font-weight:700}
           </div>
 
           <div id="estado-activo-card" hidden>
+            <div class="order-code-card">
+              <div class="oc-label" data-i18n="order_number_title">Tu número de pedido</div>
+              <div class="oc-num" id="estado-bignum">#0000</div>
+              <div class="oc-hint" data-i18n="order_number_hint">Dilo en caja cuando vayas a recoger</div>
+            </div>
             <div class="card">
               <div class="stepper" id="estado-stepper"></div>
               <div class="progress-track" id="estado-progress-track" aria-hidden="true">
@@ -606,12 +699,13 @@ h2.title{font-size:1.5rem; font-weight:700}
             </div>
             <button class="btn btn-secondary" style="margin-top:12px; width:auto; padding:10px 18px" onclick="guardarCuenta()" data-i18n="cuenta_save">Guardar</button>
           </div>
-          <div class="card">
+          <div class="card" id="cuenta-pay-card">
             <strong data-i18n="payment_method">Método de pago</strong>
             <div class="pay-saved" id="cuenta-pay" style="margin-top:10px">
               <span id="cuenta-pay-text"></span>
-              <span class="acts"><button type="button" class="btn-ghost" style="padding:0" id="cuenta-pay-btn" onclick="cuentaCard()"></button></span>
+              <span class="acts" id="cuenta-pay-acts"></span>
             </div>
+            <div id="acc-form-slot"></div>
           </div>
           <div class="card">
             <strong data-i18n="cuenta_fav">★ Favoritos</strong>
@@ -632,12 +726,24 @@ h2.title{font-size:1.5rem; font-weight:700}
 
 <div class="toast" id="toast" role="status"></div>
 
+<div id="bubble-wrap" hidden>
+  <button id="bubble" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="bubble-panel" onclick="bubbleToggle()">
+    <span class="bubble-float">
+      <svg class="bubble-ring" viewBox="0 0 68 68" aria-hidden="true"><circle class="trk" cx="34" cy="34" r="28"/><circle class="fill" id="bubble-ring-fill" cx="34" cy="34" r="28"/></svg>
+      <span class="bubble-face" id="bubble-face" aria-hidden="true"></span>
+      <span class="bubble-badge" id="bubble-badge" hidden aria-hidden="true"></span>
+    </span>
+  </button>
+  <div class="bubble-panel" id="bubble-panel" role="dialog" aria-label="Mi pedido" hidden></div>
+</div>
+
 <div class="ready-modal" id="ready-modal" hidden>
   <div class="ready-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="ready-modal-title" aria-describedby="ready-modal-sub">
     <div class="ready-modal-icon" aria-hidden="true">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
     </div>
     <h2 id="ready-modal-title" data-i18n="ready_title">¡TU PEDIDO ESTÁ LISTO PARA COMER!</h2>
+    <p class="order-num-big" id="ready-modal-num"></p>
     <p id="ready-modal-sub"></p>
     <button class="btn btn-primary" id="btn-ready-ok" onclick="closeReadyModal()" data-i18n="ready_ok">OK, ¡gracias!</button>
   </div>
@@ -721,6 +827,13 @@ const STR = {
     your_order:'Tu pedido', empty_cart:'Tu pedido está vacío.', total:'Total',
     pickup_info:'Recoger en Cafetería Piso 1 · listo en 15-20 min',
     tagline:'Pide tu almuerzo sin hacer fila · Cafetería Piso 1',
+    sound_label:'Sonido', snd_pop:'Burbuja', snd_marimba:'Marimba', snd_candy:'Dulce', snd_off:'Silencio',
+    order_number_title:'Tu número de pedido', order_number_hint:'Dilo en caja cuando vayas a recoger',
+    reorder:'↻ Pedir de nuevo', reordered: n => n === 1 ? 'Agregamos 1 plato a tu pedido' : `Agregamos ${n} platos a tu pedido`, reorder_none:'Esos platos ya no están en el menú de hoy.',
+    bubble_aria:'Mi pedido: abrir resumen', bubble_panel:'Resumen de tu pedido', bp_order:'Pedido', bp_cart_title:'Tu pedido en construcción',
+    bp_go_pay:'Ir a pagar', bp_keep:'Seguir eligiendo', bp_view_order:'Ver mi pedido', bp_ready:'¡Listo para recoger!', bp_in: t => `Listo en ${t}`,
+    bp_more: n => `y ${n} más…`, bp_items: n => n === 1 ? '1 plato' : `${n} platos`,
+    acc_add_card:'Agregar tarjeta', acc_saved_hint:'Esta tarjeta se usará para tus próximos pedidos.',
     pickup_est: m => `Recoger en Cafetería Piso 1 · listo en ~${m} min según tu pedido`,
     pay_card:'Tarjeta crédito / débito', pay_cash:'Efectivo al recoger', credit:'Crédito', debit:'Débito',
     card_type:'Tipo de tarjeta', card_number:'Número de tarjeta', card_holder:'Nombre en la tarjeta', card_exp:'Vence (MM/AA)', card_cvv:'CVV',
@@ -801,6 +914,13 @@ const STR = {
     your_order:'Your order', empty_cart:'Your order is empty.', total:'Total',
     pickup_info:'Pick up at Floor 1 Cafeteria · ready in 15-20 min',
     tagline:'Order your lunch without queuing · Floor 1 Cafeteria',
+    sound_label:'Sound', snd_pop:'Bubble', snd_marimba:'Marimba', snd_candy:'Candy', snd_off:'Mute',
+    order_number_title:'Your order number', order_number_hint:'Tell it at the counter when you pick up',
+    reorder:'↻ Order again', reordered: n => n === 1 ? 'Added 1 dish to your order' : `Added ${n} dishes to your order`, reorder_none:'Those dishes are no longer on today\'s menu.',
+    bubble_aria:'My order: open summary', bubble_panel:'Your order summary', bp_order:'Order', bp_cart_title:'Your order in progress',
+    bp_go_pay:'Go to pay', bp_keep:'Keep browsing', bp_view_order:'View my order', bp_ready:'Ready for pickup!', bp_in: t => `Ready in ${t}`,
+    bp_more: n => `and ${n} more…`, bp_items: n => n === 1 ? '1 dish' : `${n} dishes`,
+    acc_add_card:'Add card', acc_saved_hint:'This card will be used for your next orders.',
     pickup_est: m => `Pick up at Floor 1 Cafeteria · ready in ~${m} min depending on your order`,
     pay_card:'Credit / debit card', pay_cash:'Cash at pickup', credit:'Credit', debit:'Debit',
     card_type:'Card type', card_number:'Card number', card_holder:'Name on card', card_exp:'Expires (MM/YY)', card_cvv:'CVV',
@@ -859,6 +979,7 @@ function T(key, ...args){
   return typeof v === 'function' ? v(...args) : v;
 }
 function applyI18n(){
+  if (typeof renderSoundSeg === 'function' && typeof soundTheme !== 'undefined') renderSoundSeg();
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const v = T(el.dataset.i18n);
     if (typeof v === 'string') el.firstChild ? (el.childNodes[0].nodeType===3 ? el.childNodes[0].textContent = v : el.textContent = v) : el.textContent = v;
@@ -922,11 +1043,14 @@ function toggleFavorite(id){
   let nowFav;
   if (i >= 0){ profile.favoritos.splice(i,1); nowFav = false; } else { profile.favoritos.push(id); nowFav = true; }
   saveProfile();
+  justFav = id; setTimeout(()=>{ justFav = null; }, 600);
+  sfx(nowFav ? 'fav' : 'tap');
   renderMenuFull(); renderInicioPreview(); renderCuenta();
   announce(nowFav ? T('fav_add', dishName(d)) : T('fav_remove', dishName(d)));
 }
 
 let activeFilter = 'todos';
+let justAdded = null, justFav = null;
 let cart = {};        // id -> qty
 let cartNotes = {};   // id -> note text
 let order = null;     // {id, items, total, stage, totalSeconds, remaining, customerName, queueAhead}
@@ -945,8 +1069,9 @@ function renderChips(){
 }
 function setFilter(id){
   activeFilter = id;
+  sfx('chip');
   renderChips();
-  renderMenuFull();
+  renderMenuFull(); stagger('menu-dish-list');
   announce('Filtro: ' + T(FILTERS.find(f=>f.id===id).key));
 }
 function filteredDishes(){
@@ -960,19 +1085,19 @@ function dishCardHTML(d){
   const fav = isFav(d.id);
   const name = dishName(d), tag = dishTag(d);
   const thumbInner = d.img
-    ? `<img src="${d.img}" alt="" loading="lazy">`
+    ? `<img src="${d.img}" alt="" loading="lazy" onload="this.parentNode.classList.add('is-loaded')">`
     : `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="9" r="1.6" fill="currentColor" stroke="none"/><path d="M4 17l5-6 3 3.5L16 9l4 8"/></svg>`;
   return `<div class="dish-card">
     <div class="thumb" role="button" tabindex="0" aria-label="${T('zoom_photo', name)}" onclick="openLightbox('${d.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLightbox('${d.id}')}">
       ${thumbInner}
-      <button class="fav-btn" aria-pressed="${fav}" aria-label="${fav ? T('fav_remove', name) : T('fav_add', name)}" onclick="event.stopPropagation(); toggleFavorite('${d.id}')">${fav ? '★' : '☆'}</button>
+      <button class="fav-btn${d.id===justFav?' pop':''}" aria-pressed="${fav}" aria-label="${fav ? T('fav_remove', name) : T('fav_add', name)}" onclick="event.stopPropagation(); toggleFavorite('${d.id}')">${fav ? '★' : '☆'}</button>
     </div>
     <div class="dish-info">
       <span class="dish-name">${name}</span>
       ${tag ? `<span class="tag">${tag}</span>` : ''}
       <div class="price-row">
         <span class="price">${fmt(d.price)}</span>
-        <button class="add-btn" aria-label="${T('add_to_cart', name)}${qty?T('in_cart', qty):''}" onclick="addToCart('${d.id}')">+</button>
+        <button class="add-btn${d.id===justAdded?' pop':''}" aria-label="${T('add_to_cart', name)}${qty?T('in_cart', qty):''}" onclick="addToCart('${d.id}')">+</button>
       </div>
     </div>
   </div>`;
@@ -991,12 +1116,14 @@ function openLightbox(id){
       <button class="add-btn" aria-label="${T('add_to_cart', name)}" onclick="addToCart('${d.id}'); closeLightbox()">+</button>
     </div>`;
   box.querySelector('img').src = d.img || '';
+  sfx('open');
   box.classList.add('is-open');
   box.setAttribute('aria-hidden','false');
   document.getElementById('lightbox-close-btn').focus();
 }
 function closeLightbox(){
   const box = document.getElementById('photo-lightbox');
+  if (box.classList.contains('is-open')) sfx('close');
   box.classList.remove('is-open');
   box.setAttribute('aria-hidden','true');
 }
@@ -1014,21 +1141,52 @@ function renderMenuFull(){
   document.getElementById('menu-dish-list').innerHTML = list.map(dishCardHTML).join('');
 }
 
-function addToCart(id){
-  cart[id] = (cart[id]||0) + 1;
+function stagger(id){
+  const el = document.getElementById(id); if (!el) return;
+  el.classList.remove('stagger'); void el.offsetWidth; el.classList.add('stagger');
+  setTimeout(() => el.classList.remove('stagger'), 900);
+}
+function addToCart(id, qty){
+  qty = qty || 1;
+  let fromRect = null;
+  try { const ev = window.event; const b = ev && ev.target && ev.target.closest && ev.target.closest('.add-btn'); if (b) fromRect = b.getBoundingClientRect(); } catch(e){}
+  cart[id] = (cart[id]||0) + qty;
   const d = DISHES.find(x=>x.id===id);
+  justAdded = id; setTimeout(() => { justAdded = null; }, 600);
+  sfx('add');
   toast(T('added', dishName(d)));
   announce(T('added_announce', dishName(d)));
   renderInicioPreview(); renderMenuFull();
+  updateBubble(true);
+  if (fromRect) flyToBubble(fromRect);
+}
+function flyToBubble(r){
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const wrap = document.getElementById('bubble-wrap'); if (wrap.hidden) return;
+    const b = wrap.getBoundingClientRect();
+    const dot = document.createElement('div');
+    dot.style.cssText = 'position:fixed; z-index:75; width:20px; height:20px; border-radius:50%; background:var(--amber); border:2px solid #2B1710; pointer-events:none; left:0; top:0;';
+    document.body.appendChild(dot);
+    const x0 = r.left + r.width/2 - 10, y0 = r.top + r.height/2 - 10, x1 = b.left + b.width/2 - 10, y1 = b.top + b.height/2 - 10;
+    const a = dot.animate([
+      { transform:`translate(${x0}px,${y0}px) scale(1)`, opacity:1 },
+      { transform:`translate(${(x0+x1)/2}px,${Math.min(y0,y1) - 60}px) scale(1.2)`, opacity:1, offset:.5 },
+      { transform:`translate(${x1}px,${y1}px) scale(.3)`, opacity:.2 }
+    ], { duration:620, easing:'cubic-bezier(.4,.1,.3,1)' });
+    a.onfinish = () => dot.remove();
+  } catch(e){}
 }
 
 function removeFromCart(id){
   const d = DISHES.find(x=>x.id===id);
   delete cart[id];
   delete cartNotes[id];
+  sfx('remove');
   toast(T('removed', dishName(d)));
   announce(T('removed_announce', dishName(d)));
   renderInicioPreview(); renderMenuFull(); renderConfirmar();
+  updateBubble(true);
 }
 
 function cartEntries(){
@@ -1048,7 +1206,7 @@ function renderConfirmar(){
         </div>
         <input type="text" class="note-input" placeholder="${T('note_placeholder')}" value="${escapeHtml(cartNotes[e.id]||'')}" oninput="cartNotes['${e.id}']=this.value">
       </div>`).join('')
-    : `<p class="field-note">${T('empty_cart')}</p>`;
+    : `<div class="empty-mini">${emptyArt('cart')}<p class="field-note">${T('empty_cart')}</p></div>`;
   document.getElementById('cart-rows').innerHTML = rowsHTML;
   const total = cartTotal();
   document.getElementById('cart-total').textContent = fmt(total);
@@ -1092,6 +1250,93 @@ function playBeepPair(){
     osc.start(now + offset); osc.stop(now + offset + 0.16);
   });
 }
+/* ---- soft sound effects (all synthesized with Web Audio: no files, works offline) ---- */
+let soundTheme = safeGet('nutriturno_sound') || 'pop';
+if (!['pop','marimba','candy','off'].includes(soundTheme)) soundTheme = 'pop';
+const PENT = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51];   // C major pentatonic: always sounds pleasant
+let comboN = 0, comboAt = 0;
+function tone(o){
+  const t0 = audioCtx.currentTime + (o.at || 0);
+  const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(o.f0, t0);
+  if (o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1, t0 + o.dur * (o.sweep || 0.8));
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(o.vol || 0.2, t0 + (o.attack || 0.008));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + o.dur);
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0 + o.dur + 0.03);
+}
+function puff(at, vol){      // tiny filtered-noise burst: the "pop" of a rubber balloon
+  const len = Math.floor(audioCtx.sampleRate * 0.045), buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 3);
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const f = audioCtx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 0.8;
+  const g = audioCtx.createGain(); g.gain.value = vol || 0.15;
+  src.connect(f); f.connect(g); g.connect(audioCtx.destination); src.start(audioCtx.currentTime + (at || 0));
+}
+const bell = (f, at, vol) => { tone({f0:f, dur:.55, vol:vol||.16, attack:.004, at}); tone({f0:f*2.76, dur:.28, vol:(vol||.16)*.35, attack:.003, at}); tone({f0:f*5.4, dur:.12, vol:(vol||.16)*.12, attack:.002, at}); };
+const marimba = (f, at, vol) => { tone({f0:f, dur:.32, vol:vol||.24, attack:.003, at}); tone({f0:f*4, dur:.07, vol:(vol||.24)*.3, attack:.002, at}); };
+const SFX = {
+  pop: {
+    open(){ tone({f0:340, f1:1200, dur:.12, vol:.26, sweep:.9}); puff(0.005, .16); tone({f0:1600, f1:800, dur:.07, vol:.07, at:.1}); },
+    close(){ tone({f0:950, f1:320, dur:.1, vol:.2}); puff(0, .06); },
+    add(n){ const f = PENT[Math.min(n, PENT.length-1)]; tone({f0:f*.6, f1:f*1.5, dur:.13, vol:.22, sweep:.7}); puff(0.01, .09); },
+    remove(){ tone({f0:620, f1:200, dur:.16, vol:.2}); },
+    fav(){ [0,1,2].forEach(i => tone({f0:PENT[2+i*2], f1:PENT[2+i*2]*1.25, dur:.1, vol:.15, at:i*.06})); },
+    chip(){ tone({f0:700, f1:950, dur:.055, vol:.12}); },
+    bubble(){ tone({f0:480, f1:1050, dur:.11, vol:.24}); puff(0.01, .08); },
+    success(){ [0,2,4,5].forEach((k,i) => tone({f0:PENT[k], f1:PENT[k]*1.06, dur:.18, vol:.18, at:i*.09})); },
+    tap(){ tone({f0:640, f1:520, dur:.05, vol:.1}); }
+  },
+  marimba: {
+    open(){ marimba(PENT[4], 0, .26); marimba(PENT[6], .07, .22); },
+    close(){ marimba(PENT[5], 0, .2); marimba(PENT[2], .07, .18); },
+    add(n){ marimba(PENT[n % PENT.length], 0, .26); },
+    remove(){ marimba(PENT[1]*.5, 0, .26); },
+    fav(){ [0,2,4,6].forEach((k,i) => marimba(PENT[k], i*.06, .18)); },
+    chip(){ marimba(PENT[5], 0, .14); },
+    bubble(){ marimba(PENT[3], 0, .24); marimba(PENT[3]*2, .06, .16); },
+    success(){ [0,2,3,5].forEach((k,i) => marimba(PENT[k], i*.1, .22)); },
+    tap(){ marimba(PENT[4], 0, .1); }
+  },
+  candy: {
+    open(){ bell(1568, 0, .16); bell(2093, .06, .12); },
+    close(){ bell(1175, 0, .12); },
+    add(n){ bell(PENT[(n+2) % PENT.length]*2, 0, .15); },
+    remove(){ bell(660, 0, .14); },
+    fav(){ [4,5,6,7].forEach((k,i) => bell(PENT[k]*2, i*.07, .1)); },
+    chip(){ bell(1760, 0, .08); },
+    bubble(){ bell(1397, 0, .15); bell(1976, .05, .1); },
+    success(){ [3,4,5,7].forEach((k,i) => bell(PENT[k]*2, i*.1, .13)); },
+    tap(){ bell(1568, 0, .06); }
+  }
+};
+function sfx(name){
+  if (soundTheme === 'off') return;
+  try {
+    unlockAudio();
+    if (!audioCtx) return;
+    const th = SFX[soundTheme]; if (!th || !th[name]) return;
+    if (name === 'add'){ const now = performance.now(); comboN = (now - comboAt < 1600) ? comboN + 1 : 0; comboAt = now; th.add(comboN); }
+    else th[name]();
+  } catch(e){}
+}
+function setSound(t){
+  soundTheme = t; safeSet('nutriturno_sound', t);
+  renderSoundSeg();
+  if (t !== 'off'){ sfx('open'); }
+  announce(T('sound_label') + ': ' + T('snd_' + t));
+}
+function renderSoundSeg(){
+  ['pop','marimba','candy','off'].forEach(t => {
+    const b = document.getElementById('snd-' + t); if (!b) return;
+    b.setAttribute('aria-pressed', String(t === soundTheme));
+    b.setAttribute('aria-label', T('snd_' + t)); b.title = T('snd_' + t);
+  });
+}
+document.addEventListener('pointerdown', () => { try { unlockAudio(); } catch(e){} }, {once:true});
+
 function startReadyLoop(){
   unlockAudio();
   playBeepPair();
@@ -1105,6 +1350,7 @@ function stopReadyLoop(){
 
 function openReadyModal(){
   document.getElementById('ready-modal-sub').textContent = T('ready_sub', order ? order.customerName : customerName);
+  document.getElementById('ready-modal-num').textContent = order ? '#' + order.id : '';
   const modal = document.getElementById('ready-modal');
   modal.hidden = false;
   document.getElementById('btn-ready-ok').focus();
@@ -1176,6 +1422,28 @@ function updateStageFromRemaining(){
 
 /* ---- payment method (card details never leave this device; only brand/type/last4/expiry are kept) ---- */
 let payMethod = 'card';
+let cardFormOpen = false, accFormOpen = false;
+const formId = p => p === 'card' ? 'pay-form' : p + '-form';
+function payFormHTML(p){
+  return `<form class="pay-form" id="${formId(p)}" novalidate onsubmit="return saveCard(event,'${p}')" autocomplete="on">
+    <label class="full"><span data-i18n="card_type">Tipo de tarjeta</span>
+      <select id="${p}-type"><option value="credito" data-i18n="credit">Crédito</option><option value="debito" data-i18n="debit">Débito</option></select></label>
+    <label class="full"><span data-i18n="card_number">Número de tarjeta</span>
+      <input id="${p}-number" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="23" oninput="onCardNumberInput(this,'${p}')"></label>
+    <label class="full"><span data-i18n="card_holder">Nombre en la tarjeta</span>
+      <input id="${p}-holder" autocomplete="cc-name" placeholder="CARLOS PÉREZ"></label>
+    <label><span data-i18n="card_exp">Vence (MM/AA)</span>
+      <input id="${p}-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" oninput="onExpInput(this,'${p}')"></label>
+    <label><span data-i18n="card_cvv">CVV</span>
+      <input id="${p}-cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" oninput="this.value=this.value.replace(/\\D/g,'')"></label>
+    <p class="field-note field-error" id="${p}-error" role="alert" hidden style="grid-column:1 / -1; margin:0"></p>
+    <p class="field-note" style="grid-column:1 / -1; margin:0" data-i18n="card_privacy">Guardamos solo el tipo, los últimos 4 dígitos y el vencimiento en este dispositivo. Nunca el número completo ni el CVV.</p>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-secondary" data-i18n="save_card">Guardar tarjeta</button>
+      <button type="button" class="btn-ghost" id="${p}-cancel" onclick="cancelCardForm('${p}')" data-i18n="cancel">Cancelar</button>
+    </div>
+  </form>`;
+}
 function cardBrand(num){
   if (/^4/.test(num)) return 'Visa';
   if (/^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(num)) return 'Mastercard';
@@ -1184,62 +1452,57 @@ function cardBrand(num){
   if (/^(6011|65)/.test(num)) return 'Discover';
   return lang==='en' ? 'Card' : 'Tarjeta';
 }
-function onCardNumberInput(el){
+function onCardNumberInput(el, p){
   const d = el.value.replace(/\D/g,'').slice(0,19);
   const amex = /^3[47]/.test(d);
-  let out = '';
-  if (amex){ out = [d.slice(0,4), d.slice(4,10), d.slice(10,15)].filter(Boolean).join(' '); }
-  else { out = d.replace(/(.{4})/g,'$1 ').trim(); }
-  el.value = out;
-  clearCardError();
+  el.value = amex ? [d.slice(0,4), d.slice(4,10), d.slice(10,15)].filter(Boolean).join(' ') : d.replace(/(.{4})/g,'$1 ').trim();
+  clearCardError(p);
 }
-function onExpInput(el){
+function onExpInput(el, p){
   let d = el.value.replace(/\D/g,'').slice(0,4);
   if (d.length >= 3) d = d.slice(0,2) + '/' + d.slice(2);
-  el.value = d; clearCardError();
+  el.value = d; clearCardError(p);
 }
-function clearCardError(){
-  const e = document.getElementById('card-error'); if (e) e.hidden = true;
-  ['card-number','card-holder','card-exp','card-cvv'].forEach(id => document.getElementById(id).removeAttribute('aria-invalid'));
+function clearCardError(p){
+  const e = document.getElementById(p + '-error'); if (e) e.hidden = true;
+  ['number','holder','exp','cvv'].forEach(k => { const el = document.getElementById(p + '-' + k); if (el) el.removeAttribute('aria-invalid'); });
 }
-function cardFail(id, key){
-  const e = document.getElementById('card-error');
+function cardFail(p, k, key){
+  const e = document.getElementById(p + '-error');
   e.textContent = T(key); e.hidden = false;
-  const el = document.getElementById(id); el.setAttribute('aria-invalid','true'); el.focus();
+  const el = document.getElementById(p + '-' + k); el.setAttribute('aria-invalid','true'); el.focus();
   announce(T(key));
   return false;
 }
-function saveCard(ev){
+function saveCard(ev, p){
   if (ev) ev.preventDefault();
-  const num = document.getElementById('card-number').value.replace(/\D/g,'');
-  const holder = document.getElementById('card-holder').value.trim();
-  const exp = document.getElementById('card-exp').value;
-  const cvv = document.getElementById('card-cvv').value;
-  clearCardError();
-  if (num.length < 13 || num.length > 19) return cardFail('card-number','err_number');
-  if (holder.length < 3 || !/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(holder)) return cardFail('card-holder','err_holder');
+  const g = k => document.getElementById(p + '-' + k);
+  const num = g('number').value.replace(/\D/g,'');
+  const holder = g('holder').value.trim();
+  const exp = g('exp').value;
+  const cvv = g('cvv').value;
+  clearCardError(p);
+  if (num.length < 13 || num.length > 19) return cardFail(p, 'number','err_number');
+  if (holder.length < 3 || !/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(holder)) return cardFail(p, 'holder','err_holder');
   const m = /^(\d{2})\/(\d{2})$/.exec(exp);
   const now = new Date(), yy = now.getFullYear() % 100, mm = now.getMonth() + 1;
-  if (!m || +m[1] < 1 || +m[1] > 12 || +m[2] < yy || (+m[2] === yy && +m[1] < mm)) return cardFail('card-exp','err_exp');
+  if (!m || +m[1] < 1 || +m[1] > 12 || +m[2] < yy || (+m[2] === yy && +m[1] < mm)) return cardFail(p, 'exp','err_exp');
   const need = /^3[47]/.test(num) ? 4 : 3;
-  if (cvv.length !== need) return cardFail('card-cvv','err_cvv');
-  profile.card = { brand: cardBrand(num), type: document.getElementById('card-type').value, last4: num.slice(-4), exp, holder };
+  if (cvv.length !== need) return cardFail(p, 'cvv','err_cvv');
+  profile.card = { brand: cardBrand(num), type: g('type').value, last4: num.slice(-4), exp, holder };
   saveProfile();
-  ['card-number','card-holder','card-exp','card-cvv'].forEach(id => document.getElementById(id).value = '');   // never keep number/CVV in the page
-  cardFormOpen = false;
+  ['number','holder','exp','cvv'].forEach(k => g(k).value = '');   // never keep number/CVV in the page
+  cardFormOpen = false; accFormOpen = false;
   renderPayment(); renderCuenta();
+  sfx('success');
   toast(T('card_saved')); announce(T('card_saved'));
   return false;
 }
-let cardFormOpen = false;
 function editCard(){ cardFormOpen = true; renderPayment(); document.getElementById('card-number').focus(); }
-function cancelCardForm(){ cardFormOpen = false; clearCardError(); renderPayment(); }
-function removeCard(){ profile.card = null; saveProfile(); cardFormOpen = false; renderPayment(); renderCuenta(); toast(T('card_removed')); announce(T('card_removed')); }
-function cuentaCard(){
-  if (profile.card) removeCard();
-  else { payMethod = 'card'; cardFormOpen = true; goTab('menu'); showScreen('confirmar'); renderPayment(); }
-}
-function setPayMethod(m){ payMethod = m; renderPayment(); }
+function cancelCardForm(p){ if (p === 'acc') accFormOpen = false; else cardFormOpen = false; clearCardError(p); renderPayment(); renderCuenta(); }
+function removeCard(){ profile.card = null; saveProfile(); cardFormOpen = false; accFormOpen = false; sfx('remove'); renderPayment(); renderCuenta(); toast(T('card_removed')); announce(T('card_removed')); }
+function accOpenForm(){ accFormOpen = true; renderCuenta(); sfx('tap'); const el = document.getElementById('acc-number'); if (el) el.focus(); }
+function setPayMethod(m){ payMethod = m; sfx('tap'); renderPayment(); }
 function cardLabel(c){ return T('pay_with', c.brand, c.type === 'debito' ? T('debit') : T('credit'), c.last4); }
 function renderPayment(){
   const hasCard = !!profile.card;
@@ -1254,6 +1517,133 @@ function renderPayment(){
   const pe = document.getElementById('confirmar-error');
   if (!pe.hidden && document.getElementById('confirmar-error-text').textContent === T('need_method') && (payMethod==='cash' || hasCard)) pe.hidden = true;
 }
+
+
+/* ---- floating bubble: draggable shortcut to the cart / live order status ---- */
+let bubblePos = null, bubbleOpen = false, bubbleSig = '', bubbleDragged = false, lastCartCount = 0, bubbleWasShown = false;
+const BSIZE = 62;
+function loadBubblePos(){ try { const p = JSON.parse(safeGet('nutriturno_bubble') || 'null'); if (p && typeof p.x === 'number' && typeof p.y === 'number') return p; } catch(e){} return null; }
+function clampBubble(){
+  if (!bubblePos) bubblePos = loadBubblePos() || { x: window.innerWidth - BSIZE - 12, y: 118 };
+  bubblePos.x = Math.max(8, Math.min(window.innerWidth - BSIZE - 8, bubblePos.x));
+  bubblePos.y = Math.max(8, Math.min(window.innerHeight - BSIZE - 8, bubblePos.y));
+}
+function placeBubble(smooth){
+  clampBubble();
+  const w = document.getElementById('bubble-wrap');
+  w.style.transition = smooth ? 'left .32s cubic-bezier(.2,1.25,.4,1), top .25s ease-out' : 'none';
+  w.style.left = bubblePos.x + 'px'; w.style.top = bubblePos.y + 'px';
+  const p = document.getElementById('bubble-panel');
+  const right = bubblePos.x + BSIZE/2 > window.innerWidth/2, below = bubblePos.y + BSIZE/2 < window.innerHeight/2;
+  p.style.left = right ? 'auto' : '0'; p.style.right = right ? '0' : 'auto';
+  p.style.top = below ? (BSIZE + 10) + 'px' : 'auto'; p.style.bottom = below ? 'auto' : (BSIZE + 10) + 'px';
+}
+function currentScreenName(){ const s = document.querySelector('.screen.is-active'); return s ? s.id.replace('screen-','') : ''; }
+function cartCount(){ return cartEntries().reduce((s,e)=>s+e.qty, 0); }
+function bubbleToggle(){
+  if (bubbleDragged) return;
+  bubbleOpen ? closeBubble(true) : openBubble();
+}
+function openBubble(){
+  bubbleOpen = true; bubbleSig = ''; sfx('bubble');
+  document.getElementById('bubble').setAttribute('aria-expanded','true');
+  document.getElementById('bubble-panel').hidden = false;
+  placeBubble(false); updateBubble(true);
+}
+function closeBubble(sound){
+  if (!bubbleOpen) return;
+  bubbleOpen = false; if (sound) sfx('close');
+  document.getElementById('bubble').setAttribute('aria-expanded','false');
+  document.getElementById('bubble-panel').hidden = true;
+}
+function bubbleGo(where){
+  closeBubble(false); sfx('tap');
+  if (where === 'estado'){ goTab('pedidos'); }
+  else if (where === 'pay'){ goTab('menu'); showScreen('confirmar'); }
+  else if (where === 'menu'){ goTab('menu'); showScreen('menu-full'); }
+}
+function bubblePanelHTML(){
+  const entries = cartEntries(); let h = '';
+  if (order){
+    const ready = order.stage === 2;
+    h += `<div class="bp-sec"><div class="bp-head"><strong>${T('bp_order')} #${order.id}</strong><span class="bp-chip${ready?' ready':''}" id="bp-chip"></span></div>
+      <p class="bp-line" id="bp-time"></p>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="bp-fill"></div></div>
+      <p class="bp-line" id="bp-queue" style="color:var(--amber-d); font-weight:700"></p>
+      <div class="bp-btns"><button type="button" class="btn btn-primary" onclick="bubbleGo('estado')">${T('bp_view_order')}</button></div></div>`;
+  }
+  if (entries.length){
+    const shown = entries.slice(0, 4);
+    h += `<div class="bp-sec"><div class="bp-head"><strong>${T('bp_cart_title')}</strong><span class="bp-chip">${T('bp_items', cartCount())}</span></div>`
+      + shown.map(e => `<div class="bp-row"><span>${e.qty}x ${escapeHtml(dishName(e))}</span><span>${fmt(e.price*e.qty)}</span></div>`).join('')
+      + (entries.length > 4 ? `<p class="bp-line">${T('bp_more', entries.length - 4)}</p>` : '')
+      + `<div class="bp-row" style="font-weight:800; margin-top:8px"><span>${T('total')}</span><span>${fmt(cartTotal())}</span></div>
+      <div class="bp-btns"><button type="button" class="btn btn-primary" onclick="bubbleGo('pay')">${T('bp_go_pay')}</button><button type="button" class="btn btn-secondary" onclick="bubbleGo('menu')">${T('bp_keep')}</button></div></div>`;
+  }
+  return h;
+}
+function updateBubble(force){
+  const wrap = document.getElementById('bubble-wrap'); if (!wrap) return;
+  const scr = currentScreenName(), entries = cartEntries(), n = cartCount();
+  const show = (entries.length > 0 || !!order) && scr !== 'confirmar' && scr !== 'estado';
+  if (!show){ if (!wrap.hidden){ closeBubble(false); wrap.hidden = true; wrap.classList.remove('is-in'); bubbleWasShown = false; } return; }
+  if (wrap.hidden){ wrap.hidden = false; placeBubble(false); wrap.classList.remove('is-in'); void wrap.offsetWidth; wrap.classList.add('is-in'); }
+  const bubble = document.getElementById('bubble'), face = document.getElementById('bubble-face'), badge = document.getElementById('bubble-badge'), ring = document.getElementById('bubble-ring-fill');
+  const ready = !!order && order.stage === 2;
+  bubble.classList.toggle('ready', ready);
+  if (order){
+    const pct = order.totalSeconds ? Math.min(1, Math.max(0, 1 - order.remaining/order.totalSeconds)) : 1;
+    ring.style.strokeDashoffset = String(175.9 * (1 - pct));
+    face.textContent = ready ? '✓' : fmtTime(order.remaining);
+    face.style.fontSize = ready ? '1.5rem' : '.8rem';
+  } else {
+    ring.style.strokeDashoffset = '175.9';
+    face.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 8z"/><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2"/></svg>';
+    face.style.fontSize = '';
+  }
+  badge.hidden = n === 0; badge.textContent = String(n);
+  bubble.setAttribute('aria-label', T('bubble_aria') + (n ? ' · ' + T('bp_items', n) : '') + (order ? ' · #' + order.id : ''));
+  if (n > lastCartCount){ wrap.classList.remove('bump'); void wrap.offsetWidth; wrap.classList.add('bump'); setTimeout(() => wrap.classList.remove('bump'), 600); }
+  lastCartCount = n;
+  if (bubbleOpen){
+    const sig = JSON.stringify([cart, order ? [order.id, order.stage] : null, lang]);
+    if (force || sig !== bubbleSig){ bubbleSig = sig; document.getElementById('bubble-panel').innerHTML = bubblePanelHTML(); }
+    if (order){
+      const chip = document.getElementById('bp-chip'), tm = document.getElementById('bp-time'), fl = document.getElementById('bp-fill'), q = document.getElementById('bp-queue');
+      if (chip){ chip.textContent = [T('stage_received'), T('stage_prep'), T('stage_ready')][order.stage]; tm.textContent = ready ? T('bp_ready') : T('bp_in', fmtTime(order.remaining));
+        fl.style.width = Math.round((order.totalSeconds ? 1 - order.remaining/order.totalSeconds : 1) * 100) + '%'; q.textContent = (!ready && order.queueAhead > 0) ? T('queue_ahead', order.queueAhead) : ''; }
+    }
+  }
+  document.getElementById('bubble-panel').setAttribute('aria-label', T('bubble_panel'));
+}
+(function initBubble(){
+  const b = document.getElementById('bubble'), wrap = document.getElementById('bubble-wrap');
+  let sx = 0, sy = 0, ox = 0, oy = 0, down = false;
+  b.addEventListener('pointerdown', e => {
+    down = true; bubbleDragged = false; sx = e.clientX; sy = e.clientY; ox = bubblePos ? bubblePos.x : 0; oy = bubblePos ? bubblePos.y : 0;
+    try { b.setPointerCapture(e.pointerId); } catch(_){}
+  });
+  b.addEventListener('pointermove', e => {
+    if (!down) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!bubbleDragged && Math.hypot(dx, dy) > 6){ bubbleDragged = true; closeBubble(false); }
+    if (bubbleDragged){ bubblePos = { x: ox + dx, y: oy + dy }; placeBubble(false); }
+  });
+  const end = () => {
+    if (!down) return; down = false;
+    if (bubbleDragged){
+      clampBubble();
+      bubblePos.x = (bubblePos.x + BSIZE/2 < window.innerWidth/2) ? 10 : window.innerWidth - BSIZE - 10;    // fly to the nearest side
+      safeSet('nutriturno_bubble', JSON.stringify(bubblePos)); placeBubble(true); sfx('tap');
+      setTimeout(() => { bubbleDragged = false; }, 60);
+    }
+  };
+  b.addEventListener('pointerup', end); b.addEventListener('pointercancel', end);
+  window.addEventListener('resize', () => { if (!wrap.hidden) placeBubble(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && bubbleOpen){ closeBubble(true); b.focus(); } });
+  document.addEventListener('pointerdown', e => { if (bubbleOpen && !wrap.contains(e.target)) closeBubble(false); });
+  setInterval(() => updateBubble(false), 500);
+})();
 
 function clearNameError(){
   document.getElementById('name-error').hidden = true;
@@ -1312,7 +1702,7 @@ function pagar(){
     profile.historial.unshift({
       id: orderId,
       date: new Date().toLocaleString(lang==='en' ? 'en-US' : 'es-CO', { dateStyle:'medium', timeStyle:'short' }),
-      items: entries.map(e => ({ name: dishName(e), qty: e.qty, note: e.note })),
+      items: entries.map(e => ({ id: e.id, name: dishName(e), qty: e.qty, note: e.note })),
       total: orderTotal,
     });
     if (profile.historial.length > 12) profile.historial.length = 12;
@@ -1323,6 +1713,7 @@ function pagar(){
     goTab('pedidos');
     showScreen('estado');
     startOrderTimer();
+    sfx('success');
     announce(T('order_confirmed'));
   }, 900);
 }
@@ -1334,6 +1725,7 @@ function renderEstado(){
   document.getElementById('estado-code').hidden = !hasOrder;
   if (!hasOrder) return;
   document.getElementById('estado-code').textContent = T('order_hash') + order.id + ' · ' + order.customerName;
+  document.getElementById('estado-bignum').textContent = '#' + order.id;
   const stageLabels = [T('stage_received'), T('stage_prep'), T('stage_ready')];
   const stepperHTML = stageLabels.map((label,i) => {
     const cls = i < order.stage ? 'is-done' : i === order.stage ? 'is-active' : '';
@@ -1374,9 +1766,45 @@ function cancelarPedido(){
 }
 
 /* ---- Cuenta (local demo account): name, favorites, order history ---- */
+function emptyArt(kind){
+  const A = 'var(--amber)', D = 'var(--amber-d)', B = 'var(--amber-bg)';
+  const art = {
+    cart: `<ellipse cx="40" cy="66" rx="24" ry="4" fill="${B}"/><path d="M16 30h48l-5 28a6 6 0 0 1-6 5H27a6 6 0 0 1-6-5z" fill="${B}" stroke="${D}" stroke-width="2.5" stroke-linejoin="round"/><path d="M28 30c0-9 5-16 12-16s12 7 12 16" fill="none" stroke="${D}" stroke-width="2.5" stroke-linecap="round"/><circle cx="31" cy="44" r="2.4" fill="${A}"/><circle cx="49" cy="44" r="2.4" fill="${A}"/><path d="M34 52q6 5 12 0" fill="none" stroke="${D}" stroke-width="2.5" stroke-linecap="round"/>`,
+    history: `<ellipse cx="40" cy="68" rx="22" ry="3.5" fill="${B}"/><path d="M22 12h36v52l-6-4-6 4-6-4-6 4-6-4-6 4z" fill="${B}" stroke="${D}" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 26h20M30 35h20M30 44h12" stroke="${D}" stroke-width="2.5" stroke-linecap="round"/><circle cx="56" cy="18" r="5" fill="${A}"/>`,
+    fav: `<ellipse cx="40" cy="68" rx="20" ry="3.5" fill="${B}"/><path d="M40 12l8.4 17 18.6 2.7-13.5 13.2 3.2 18.6L40 55l-16.7 8.5 3.2-18.6L13 31.7 31.6 29z" fill="${B}" stroke="${D}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="62" cy="14" r="2.6" fill="${A}"/><circle cx="16" cy="18" r="2" fill="${A}"/>`,
+    plate: `<ellipse cx="40" cy="64" rx="30" ry="5" fill="${B}"/><circle cx="40" cy="42" r="22" fill="${B}" stroke="${D}" stroke-width="2.5"/><circle cx="40" cy="42" r="13" fill="none" stroke="${D}" stroke-width="2" stroke-dasharray="3 4"/><path d="M30 14q-3-4 0-8M40 14q-3-4 0-8M50 14q-3-4 0-8" fill="none" stroke="${A}" stroke-width="2.5" stroke-linecap="round"/>`
+  };
+  return `<svg viewBox="0 0 80 80" aria-hidden="true">${art[kind] || ''}</svg>`;
+}
+function dishIdFromName(name){
+  const n = String(name||'').trim().toLowerCase();
+  const d = DISHES.find(x => x.name.toLowerCase() === n) || DISHES.find(x => DISH_I18N[x.id] && DISH_I18N[x.id].name.toLowerCase() === n);
+  return d ? d.id : null;
+}
+function reorder(orderId){
+  const h = profile.historial.find(x => String(x.id) === String(orderId)); if (!h) return;
+  let n = 0;
+  h.items.forEach(it => {
+    const id = (it.id && DISHES.some(d => d.id === it.id)) ? it.id : dishIdFromName(it.name);
+    if (!id) return;
+    cart[id] = (cart[id]||0) + (it.qty||1); n += (it.qty||1);
+    if (it.note && !cartNotes[id]) cartNotes[id] = it.note;
+  });
+  if (!n){ toast(T('reorder_none')); announce(T('reorder_none')); return; }
+  sfx('add'); setTimeout(() => sfx('add'), 90);
+  toast(T('reordered', n)); announce(T('reordered', n));
+  renderInicioPreview(); renderMenuFull();
+  goTab('menu'); showScreen('confirmar');
+}
 function renderCuenta(){
   const cp = document.getElementById('cuenta-pay-text');
-  if (cp){ cp.textContent = profile.card ? cardLabel(profile.card) : T('no_card'); document.getElementById('cuenta-pay-btn').textContent = profile.card ? T('remove_card') : T('add_card'); }
+  if (cp){
+    cp.textContent = profile.card ? cardLabel(profile.card) : T('no_card');
+    document.getElementById('cuenta-pay-acts').innerHTML = profile.card
+      ? `<button type="button" class="btn-ghost" style="padding:0" onclick="accOpenForm()">${T('change')}</button> <button type="button" class="btn-ghost" style="padding:0" onclick="removeCard()">${T('remove_card')}</button>`
+      : (accFormOpen ? '' : `<button type="button" class="btn-ghost" style="padding:0" onclick="accOpenForm()">${T('acc_add_card')}</button>`);
+    const f = document.getElementById('acc-form'); if (f){ f.style.display = accFormOpen ? '' : 'none'; document.getElementById('acc-cancel').hidden = false; }
+  }
   const nEl = document.getElementById('cuenta-nombre'), aEl = document.getElementById('cuenta-apellido');
   if (nEl) nEl.value = profile.nombre;
   if (aEl) aEl.value = profile.apellido;
@@ -1385,7 +1813,7 @@ function renderCuenta(){
   if (favList){
     favList.innerHTML = favs.length
       ? favs.map(d => `<div class="fav-row"><span>★ ${dishName(d)}</span><button class="btn-ghost" style="padding:0" onclick="toggleFavorite('${d.id}')">✕</button></div>`).join('')
-      : `<p class="field-note">${T('cuenta_fav_empty')}</p>`;
+      : `<div class="empty-mini">${emptyArt('fav')}<p class="field-note">${T('cuenta_fav_empty')}</p></div>`;
   }
   const histList = document.getElementById('cuenta-historial-list');
   if (histList){
@@ -1394,9 +1822,9 @@ function renderCuenta(){
         <div class="hist-item">
           <div class="hist-head"><strong>${T('order_hash')}${h.id}</strong><span class="field-note">${escapeHtml(h.date)}</span></div>
           <div class="field-note">${h.items.map(it => `${it.qty}x ${escapeHtml(it.name)}${it.note?` (${escapeHtml(it.note)})`:''}`).join(', ')}</div>
-          <div style="font-weight:700; margin-top:4px">${fmt(h.total)}</div>
+          <div class="hist-actions"><span style="font-weight:700">${fmt(h.total)}</span><button type="button" class="reorder-btn" onclick="reorder('${h.id}')">${T('reorder')}</button></div>
         </div>`).join('')
-      : `<p class="field-note">${T('cuenta_hist_empty')}</p>`;
+      : `<div class="empty-mini">${emptyArt('history')}<p class="field-note">${T('cuenta_hist_empty')}</p></div>`;
   }
 }
 function guardarCuenta(){
@@ -1422,8 +1850,12 @@ function showScreen(name){
   if (name === 'confirmar') renderConfirmar();
   if (name === 'estado') renderEstado();
   if (name === 'cuenta') renderCuenta();
+  if (name === 'inicio') stagger('inicio-dish-preview');
+  if (name === 'menu-full') stagger('menu-dish-list');
+  updateBubble(true);
 }
 function goTab(tab){
+  sfx('tap');
   document.querySelectorAll('.tabbar button[data-tab]').forEach(b => {
     if (b.dataset.tab === tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
   });
@@ -1438,28 +1870,11 @@ function setDevice(mode){
   document.getElementById('btn-desktop').setAttribute('aria-pressed', String(mode==='desktop'));
 }
 
-// floating "ver pedido" affordance: add a persistent button by wiring into renderMenuFull's parent flow
-(function initGoToCart(){
-  const observer = () => {
-    const entries = cartEntries();
-    let bar = document.getElementById('cart-fab');
-    if (entries.length > 0){
-      if (!bar){
-        bar = document.createElement('button');
-        bar.id = 'cart-fab';
-        bar.className = 'btn btn-primary';
-        bar.style.cssText = 'position:sticky; bottom:8px; margin-top:16px;';
-        bar.onclick = () => showScreen('confirmar');
-        document.getElementById('screen-menu-full').appendChild(bar);
-      }
-      bar.textContent = `${fmt(cartTotal())} · ${entries.reduce((s,e)=>s+e.qty,0)}`;
-    } else if (bar){ bar.remove(); }
-  };
-  const origAdd = addToCart;
-  addToCart = function(id){ origAdd(id); observer(); };
-  window.addEventListener('DOMContentLoaded', observer);
-})();
+/* the old sticky bottom cart bar was replaced by the floating bubble (see updateBubble) */
 
+document.getElementById('card-form-slot').innerHTML = payFormHTML('card');
+document.getElementById('acc-form-slot').innerHTML = payFormHTML('acc');
+document.getElementById('estado-empty-art').innerHTML = '<div class="empty-mini">' + emptyArt('plate') + '</div>';
 applyTheme();
 applyI18n();
 renderChips();
@@ -1467,6 +1882,7 @@ restoreOrder();
 renderPayment();
 if (window.innerWidth >= 900) setDevice('desktop');
 (function(){ const s = document.getElementById('splash'); const hide = () => { s.classList.add('is-hidden'); setTimeout(() => s.remove(), 600); }; setTimeout(hide, 1500); s.addEventListener('click', hide); })();
+stagger('inicio-dish-preview'); updateBubble(true);
 renderInicioPreview();
 renderMenuFull();
 renderEstado();

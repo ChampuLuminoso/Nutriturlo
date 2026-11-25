@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>NutriTurno</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%23F3A53C'/><g fill='%232B1710' color='%232B1710' transform='translate(9 6) scale(.72)'><ellipse cx='32' cy='58' rx='27' ry='3.4' opacity='0'/><path d='M32 12c-9 0-15 8-15 18 0 8 4 14 8 17h14c4-3 8-9 8-17 0-10-6-18-15-18z'/><g transform='rotate(32 22 46)'><ellipse cx='22' cy='49' rx='5.2' ry='10'/><rect x='20.6' y='56' width='2.8' height='5' rx='1.2'/><circle cx='20.4' cy='62' r='2.3'/><circle cx='23.8' cy='62' r='2.3'/></g><g transform='rotate(-32 42 46)'><ellipse cx='42' cy='49' rx='5.2' ry='10'/><rect x='40.6' y='56' width='2.8' height='5' rx='1.2'/><circle cx='40.2' cy='62' r='2.3'/><circle cx='43.6' cy='62' r='2.3'/></g><g transform='rotate(18 15 28)'><ellipse cx='15' cy='29' rx='4.2' ry='9'/></g><g transform='rotate(-18 49 28)'><ellipse cx='49' cy='29' rx='4.2' ry='9'/></g><path d='M26 7c-2-2 2-3 0-5M32 7c-2-2 2-3 0-5M38 7c-2-2 2-3 0-5' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'/></g></svg>">
@@ -109,6 +110,7 @@ button{font-family:inherit}
   border-radius:28px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(43,23,16,.35);
   display:flex; flex-direction:column; min-height:780px;
 }
+@media (max-width:520px){ .statusbar{display:none} .stage{margin:0 -6px} .device[data-mode="mobile"]{border-radius:0; border-left:0; border-right:0; box-shadow:none} }
 .device[data-mode="desktop"]{max-width:1560px; border-radius:16px; flex-direction:row; min-height:860px}
 
 .app-body{flex:1; display:flex; flex-direction:column; min-width:0}
@@ -551,7 +553,8 @@ h2.title{font-size:1.5rem; font-weight:700}
   </div>
   <div class="toolbar-group">
     <div class="seg" role="group" aria-label="Tamaño de pantalla">
-      <button id="btn-mobile" aria-pressed="true" onclick="setDevice('mobile')">📱 <span data-i18n="size_mobile">Móvil</span></button>
+      <button id="btn-auto" aria-pressed="true" onclick="setDevice('auto')" title="Se adapta al tamaño de tu pantalla / Fits your screen">✨ <span data-i18n="size_auto">Auto</span></button>
+      <button id="btn-mobile" aria-pressed="false" onclick="setDevice('mobile')">📱 <span data-i18n="size_mobile">Móvil</span></button>
       <button id="btn-desktop" aria-pressed="false" onclick="setDevice('desktop')">🖥️ <span data-i18n="size_desktop">Escritorio</span></button>
     </div>
     <div class="seg" role="group" aria-label="Tema">
@@ -900,7 +903,7 @@ function safeSet(k,v){ try { localStorage.setItem(k, v); } catch(e){} }
 let lang = safeGet('nutriturno_lang') || 'es';
 const STR = {
   es: {
-    size_mobile:'Móvil', size_desktop:'Escritorio',
+    size_auto:'Auto', size_mobile:'Móvil', size_desktop:'Escritorio',
     simerr:'Simular error de pago (demo)',
     prep_label_short:'Tiempo prep.', seg:'seg', queue_label_short:'Fila',
     accelerate:'⏩ Adelantar a "Listo" (demo)',
@@ -997,7 +1000,7 @@ const STR = {
     dishes_available: n => n + ' plato' + (n===1?'':'s') + ' disponible' + (n===1?'':'s'),
   },
   en: {
-    size_mobile:'Mobile', size_desktop:'Desktop',
+    size_auto:'Auto', size_mobile:'Mobile', size_desktop:'Desktop',
     simerr:'Simulate payment error (demo)',
     prep_label_short:'Prep time', seg:'sec', queue_label_short:'Queue',
     accelerate:'⏩ Fast-forward to "Ready" (demo)',
@@ -2137,12 +2140,20 @@ function goTab(tab){
   if (tab === 'cuenta') showScreen('cuenta');
 }
 
-function setDevice(mode){
-  document.getElementById('device').dataset.mode = mode;
-  document.getElementById('btn-mobile').setAttribute('aria-pressed', String(mode==='mobile'));
-  document.getElementById('btn-desktop').setAttribute('aria-pressed', String(mode==='desktop'));
-  renderInicioPreview();
+let deviceChoice = 'auto';
+try { const s = localStorage.getItem('nt_device'); if (s==='mobile'||s==='desktop'||s==='auto') deviceChoice = s; } catch(e){}
+function effectiveMode(){ return deviceChoice==='auto' ? (window.innerWidth >= 900 ? 'desktop' : 'mobile') : deviceChoice; }
+function applyDevice(){
+  const d = document.getElementById('device'), m = effectiveMode();
+  if (d.dataset.mode !== m){ d.dataset.mode = m; renderInicioPreview(); }
+  ['auto','mobile','desktop'].forEach(k => document.getElementById('btn-'+k).setAttribute('aria-pressed', String(deviceChoice===k)));
 }
+function setDevice(choice){
+  deviceChoice = choice;
+  try { localStorage.setItem('nt_device', choice); } catch(e){}
+  applyDevice();
+}
+let _devT; window.addEventListener('resize', () => { clearTimeout(_devT); _devT = setTimeout(applyDevice, 120); });
 
 /* the old sticky bottom cart bar was replaced by the floating bubble (see updateBubble) */
 
@@ -2154,7 +2165,7 @@ applyI18n();
 renderChips();
 restoreOrder();
 renderPayment();
-if (window.innerWidth >= 900) setDevice('desktop');
+applyDevice();
 (function(){ const s = document.getElementById('splash'); const hide = () => { s.classList.add('is-hidden'); setTimeout(() => s.remove(), 600); }; setTimeout(hide, 1500); s.addEventListener('click', hide); })();
 stagger('inicio-dish-preview'); updateBubble(true); renderInicioSide();
 if (kitchenTab){ document.title = 'NutriTurno · Cocina'; toggleKitchen(true); }
@@ -2166,3 +2177,5 @@ document.getElementById('input-nombre').value = profile.nombre;
 document.getElementById('input-apellido').value = profile.apellido;
 document.getElementById('inicio-greeting').textContent = T('greeting') + ' ' + profile.nombre;
 </script>
+
+</body></html>
